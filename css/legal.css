@@ -1,0 +1,119 @@
+/* ===== LEGAL PAGES ===== */
+
+.nav-back {
+  color: #64748b;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.nav-back:hover { color: #7c3aed; }
+
+.legal-page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+}
+
+.legal-header {
+  text-align: center;
+  margin-bottom: 48px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.legal-header h1 {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #0f172a;
+  margin-bottom: 8px;
+}
+
+.legal-header p {
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.legal-body section {
+  margin-bottom: 36px;
+}
+
+.legal-body section h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.legal-body p {
+  color: #475569;
+  font-size: 0.95rem;
+  line-height: 1.75;
+  margin-bottom: 10px;
+}
+
+.legal-body ul,
+.legal-body ol {
+  padding-left: 20px;
+  margin: 8px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.legal-body li {
+  color: #475569;
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+
+.legal-body a {
+  color: #7c3aed;
+  text-decoration: none;
+  font-weight: 500;
+}
+.legal-body a:hover { text-decoration: underline; }
+
+.legal-body strong { color: #1e293b; }
+
+/* Highlight box (used in refund page) */
+.highlight-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  background: rgba(16,185,129,0.06);
+  border: 1.5px solid rgba(16,185,129,0.25);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 36px;
+}
+
+.highlight-icon { font-size: 1.6rem; flex-shrink: 0; margin-top: 2px; }
+
+.highlight-box strong {
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #065f46;
+  margin-bottom: 4px;
+}
+
+.highlight-box p {
+  margin: 0;
+  color: #047857;
+  font-size: 0.92rem;
+}
+
+/* Footer for legal pages */
+.footer-inner-sm {
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.82rem;
+}
+.footer-inner-sm a {
+  color: #7c3aed;
+  text-decoration: none;
+}
+.footer-inner-sm a:hover { text-decoration: underline; }
