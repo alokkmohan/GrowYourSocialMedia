@@ -39,17 +39,17 @@ const planData = {
     ],
   },
   facebook: {
-    views: [
-      { qty: '100',   unit: 'Video Views', dur: '1 day',   price: 89  },
-      { qty: '200',   unit: 'Video Views', dur: '2 days',  price: 169 },
-      { qty: '500',   unit: 'Video Views', dur: '3 days',  price: 379 },
-      { qty: '1,000', unit: 'Video Views', dur: '5 days',  price: 649 },
+    reels: [
+      { qty: '1,000–1,800',   unit: 'Reels Views', dur: '2–3 days',  price: 100 },
+      { qty: '2,200–3,500',   unit: 'Reels Views', dur: '3–5 days',  price: 200 },
+      { qty: '6,000–10,000',  unit: 'Reels Views', dur: '5–7 days',  price: 500 },
+      { qty: '12,000–20,000', unit: 'Reels Views', dur: '7–10 days', price: 999 },
     ],
-    followers: [
-      { qty: '100',   unit: 'Page Likes', dur: '3 days',  price: 249  },
-      { qty: '200',   unit: 'Page Likes', dur: '5 days',  price: 449  },
-      { qty: '500',   unit: 'Page Likes', dur: '7 days',  price: 999  },
-      { qty: '1,000', unit: 'Page Likes', dur: '10 days', price: 1849 },
+    video: [
+      { qty: '400–800',   unit: 'Video Views', dur: '2–3 days',  price: 100 },
+      { qty: '900–1,600', unit: 'Video Views', dur: '3–5 days',  price: 200 },
+      { qty: '2,500–4,500',unit: 'Video Views', dur: '5–7 days',  price: 500 },
+      { qty: '5,000–9,000',unit: 'Video Views', dur: '7–10 days', price: 999 },
     ],
   },
 };
@@ -64,22 +64,22 @@ const objectives = {
     { key: 'views',     icon: '▶️', label: 'Reel Views',   sub: 'Reels par views badhao' },
     { key: 'followers', icon: '👥', label: 'Followers',     sub: 'Profile followers badhao' },
   ],
-  facebook:  [
-    { key: 'views',     icon: '▶️', label: 'Video Views',   sub: 'Video views badhao' },
-    { key: 'followers', icon: '👍', label: 'Page Likes',    sub: 'Page likes badhao' },
+  facebook: [
+    { key: 'reels', icon: '⚡', label: 'Reels Views', sub: 'Facebook Reels par views badhao' },
+    { key: 'video', icon: '▶️', label: 'Video Views', sub: 'Normal video par views badhao' },
   ],
 };
 
 const linkLabels = {
   youtube:   { shorts: 'YouTube Shorts URL', longvideo: 'YouTube Video URL' },
   instagram: { views: 'Instagram Reel URL', followers: 'Instagram Profile URL' },
-  facebook:  { views: 'Facebook Video URL', followers: 'Facebook Page URL' },
+  facebook:  { reels: 'Facebook Reel URL', video: 'Facebook Video URL' },
 };
 
 const linkPlaceholders = {
   youtube:   { shorts: 'https://www.youtube.com/shorts/...', longvideo: 'https://www.youtube.com/watch?v=...' },
   instagram: { views: 'https://www.instagram.com/reel/...', followers: 'https://www.instagram.com/yourprofile' },
-  facebook:  { views: 'https://www.facebook.com/video/...', followers: 'https://www.facebook.com/yourpage' },
+  facebook:  { reels: 'https://www.facebook.com/reel/...', video: 'https://www.facebook.com/video/...' },
 };
 
 // =============================================
