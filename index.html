@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BoostKaro — Social Media Promotion</title>
+  <title>BoostKaro — Grow Your Social Media</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -15,307 +15,211 @@
   <nav>
     <div class="nav-inner">
       <div class="logo">⚡ BoostKaro</div>
-      <a href="#order" class="nav-cta">Get Started →</a>
+      <div class="nav-links">
+        <a href="#how">How it Works</a>
+        <a href="#faq">FAQ</a>
+        <a href="#platforms" class="nav-cta">Start Now →</a>
+      </div>
     </div>
   </nav>
 
   <!-- HERO -->
   <section class="hero">
-    <div class="hero-glow"></div>
-    <div class="hero-inner">
-      <div class="hero-badge">🚀 Trusted by 10,000+ creators</div>
-      <h1>Apni Social Media<br/><span class="gradient-text">Growth Rocket Karo</span></h1>
-      <p class="hero-sub">No login. No account. Sirf link do, payment karo — campaign shuru.<br/>Meta &amp; YouTube promotions, 24 ghante mein live.</p>
-      <div class="hero-btns">
-        <a href="#order" class="btn-hero-primary">Abhi Start Karo →</a>
-        <a href="#how" class="btn-hero-ghost">Kaise kaam karta hai?</a>
-      </div>
-
-      <!-- Stats -->
-      <div class="stats-row">
-        <div class="stat">
-          <span class="stat-num">10K+</span>
-          <span class="stat-label">Orders Completed</span>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat">
-          <span class="stat-num">4.9★</span>
-          <span class="stat-label">Average Rating</span>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat">
-          <span class="stat-num">24hr</span>
-          <span class="stat-label">Campaign Start</span>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat">
-          <span class="stat-num">₹0</span>
-          <span class="stat-label">Hidden Charges</span>
-        </div>
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <div class="hero-badge">🚀 10,000+ Successful Orders</div>
+      <h1>Grow Your <span class="gradient-text">Social Media</span><br/>Without Any Hassle</h1>
+      <p>No login. No account. Sirf platform choose karo, plan lo, payment karo — 24 ghante mein live!</p>
+      <div class="hero-stats">
+        <div class="hstat"><strong>10K+</strong><span>Orders Done</span></div>
+        <div class="hstat"><strong>4.9★</strong><span>Rating</span></div>
+        <div class="hstat"><strong>24hr</strong><span>Go Live</span></div>
+        <div class="hstat"><strong>100%</strong><span>Safe</span></div>
       </div>
     </div>
   </section>
 
-  <!-- PLATFORMS BANNER -->
-  <div class="platforms-banner">
-    <span>Works with</span>
-    <div class="platform-pills">
-      <span class="pill">📘 Instagram</span>
-      <span class="pill">📘 Facebook</span>
-      <span class="pill">▶️ YouTube</span>
-    </div>
-  </div>
-
-  <!-- ORDER FORM -->
-  <section class="form-section" id="order">
-    <div class="form-wrap">
-
-      <!-- Progress Bar -->
-      <div class="progress-bar">
-        <div class="progress-fill" id="progressFill" style="width:20%"></div>
-      </div>
-      <p class="progress-label" id="progressLabel">Step 1 of 5</p>
-
-      <div class="card" id="orderForm">
-
-        <!-- STEP 1: Platform -->
-        <div class="step" id="step1">
-          <div class="step-header">
-            <div class="step-icon">📱</div>
-            <div>
-              <h2>Platform Select Karo</h2>
-              <p class="step-sub">Kahan promote karna chahte ho?</p>
-            </div>
-          </div>
-          <div class="btn-group">
-            <button class="platform-btn" data-value="meta" onclick="selectPlatform('meta')">
-              <span class="btn-emoji">📘</span>
-              <span class="btn-title">Meta</span>
-              <span class="btn-sub">Instagram / Facebook</span>
-            </button>
-            <button class="platform-btn" data-value="youtube" onclick="selectPlatform('youtube')">
-              <span class="btn-emoji">▶️</span>
-              <span class="btn-title">YouTube</span>
-              <span class="btn-sub">Video / Channel</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- STEP 2: Objective -->
-        <div class="step hidden" id="step2">
-          <div class="step-header">
-            <div class="step-icon">🎯</div>
-            <div>
-              <h2>Objective Choose Karo</h2>
-              <p class="step-sub">Kya badhana chahte ho?</p>
-            </div>
-          </div>
-          <div class="btn-group">
-            <button class="obj-btn" data-value="views" onclick="selectObjective('views')">
-              <span class="btn-emoji">👁️</span>
-              <span class="btn-title">Views</span>
-              <span class="btn-sub">Video par views badhao</span>
-            </button>
-            <button class="obj-btn" data-value="followers" onclick="selectObjective('followers')">
-              <span class="btn-emoji">👥</span>
-              <span class="btn-title">Followers</span>
-              <span class="btn-sub">Profile followers badhao</span>
-            </button>
-          </div>
-          <p class="back-link" onclick="goBack(2)">← Wapas jao</p>
-        </div>
-
-        <!-- STEP 3: Link + Email -->
-        <div class="step hidden" id="step3">
-          <div class="step-header">
-            <div class="step-icon">🔗</div>
-            <div>
-              <h2>Apni Details Do</h2>
-              <p class="step-sub">Link aur email enter karo</p>
-            </div>
-          </div>
-          <div class="form-group">
-            <label id="linkLabel">Video / Profile URL</label>
-            <input type="url" id="userLink" placeholder="https://www.instagram.com/..." required />
-          </div>
-          <div class="form-group">
-            <label>Email Address</label>
-            <input type="email" id="userEmail" placeholder="aapka@email.com" required />
-            <span class="input-hint">Order confirmation yahan aayega</span>
-          </div>
-          <button class="btn-primary" onclick="goToPlans()">Plans Dekho →</button>
-          <p class="back-link" onclick="goBack(3)">← Wapas jao</p>
-        </div>
-
-        <!-- STEP 4: Plan Selection -->
-        <div class="step hidden" id="step4">
-          <div class="step-header">
-            <div class="step-icon">💰</div>
-            <div>
-              <h2>Plan Select Karo</h2>
-              <p class="step-sub">Apne budget ke hisaab se chunein</p>
-            </div>
-          </div>
-          <div class="plans-grid" id="plansGrid"></div>
-          <p class="back-link" onclick="goBack(4)">← Wapas jao</p>
-        </div>
-
-        <!-- STEP 5: Confirm + Pay -->
-        <div class="step hidden" id="step5">
-          <div class="step-header">
-            <div class="step-icon">✅</div>
-            <div>
-              <h2>Confirm &amp; Pay</h2>
-              <p class="step-sub">Details check karo aur payment karo</p>
-            </div>
-          </div>
-          <div class="summary-box" id="summaryBox"></div>
-          <button class="btn-pay" id="payBtn" onclick="initiatePayment()">
-            <span>💳 Secure Payment Karo</span>
-            <span class="pay-amount">₹<span id="payAmount"></span></span>
-          </button>
-          <div class="trust-row">
-            <span>🔒 SSL Secured</span>
-            <span>🏦 Razorpay</span>
-            <span>↩️ Refund Policy</span>
-          </div>
-          <p class="back-link" onclick="goBack(5)">← Plan change karo</p>
-        </div>
-
-      </div>
+  <!-- ============================
+       SECTION 1: PLATFORM CARDS
+  ============================= -->
+  <section class="section-block" id="platforms">
+    <div class="section-title">
+      <span class="chip">Step 1</span>
+      <h2>Platform Select Karo</h2>
+      <p>Kahan promote karna chahte ho?</p>
     </div>
 
-    <!-- RIGHT SIDE TRUST PANEL -->
-    <div class="trust-panel">
-      <h3>Kyun Choose Karein?</h3>
-      <ul class="trust-list">
-        <li><span class="tl-icon">⚡</span><div><strong>Super Fast</strong><br/><small>24 ghante mein campaign live</small></div></li>
-        <li><span class="tl-icon">🔒</span><div><strong>100% Safe</strong><br/><small>Razorpay se secure payment</small></div></li>
-        <li><span class="tl-icon">🤝</span><div><strong>No Login Required</strong><br/><small>Koi account nahi banana</small></div></li>
-        <li><span class="tl-icon">↩️</span><div><strong>Refund Guarantee</strong><br/><small>Fail ho to full refund</small></div></li>
-        <li><span class="tl-icon">📧</span><div><strong>Email Updates</strong><br/><small>Start &amp; end par notification</small></div></li>
-      </ul>
+    <div class="platform-cards">
 
-      <div class="review-card">
-        <div class="review-stars">★★★★★</div>
-        <p>"Seedha kaam kiya! YouTube pe 5000 views mile 7 din mein. Highly recommended!"</p>
-        <span class="reviewer">— Rahul M., Delhi</span>
+      <div class="pcard pcard-yt" onclick="selectPlatform('youtube', this)">
+        <div class="pcard-icon">
+          <svg viewBox="0 0 48 48" fill="none"><rect width="48" height="48" rx="12" fill="white" fill-opacity="0.2"/><path d="M38.5 16.5C38.1 14.9 36.8 13.6 35.2 13.2C32.4 12.5 24 12.5 24 12.5C24 12.5 15.6 12.5 12.8 13.2C11.2 13.6 9.9 14.9 9.5 16.5C8.8 19.3 8.8 24 8.8 24C8.8 24 8.8 28.7 9.5 31.5C9.9 33.1 11.2 34.4 12.8 34.8C15.6 35.5 24 35.5 24 35.5C24 35.5 32.4 35.5 35.2 34.8C36.8 34.4 38.1 33.1 38.5 31.5C39.2 28.7 39.2 24 39.2 24C39.2 24 39.2 19.3 38.5 16.5Z" fill="white"/><path d="M21 28.5L28.5 24L21 19.5V28.5Z" fill="#FF0000"/></svg>
+        </div>
+        <h3>YouTube</h3>
+        <p>Views & Subscribers badhao</p>
+        <div class="pcard-arrow">→</div>
       </div>
 
-      <div class="review-card">
-        <div class="review-stars">★★★★★</div>
-        <p>"Instagram followers bhot fast mile. Service ekdum mast hai, dobara lunga."</p>
-        <span class="reviewer">— Priya S., Mumbai</span>
+      <div class="pcard pcard-ig" onclick="selectPlatform('instagram', this)">
+        <div class="pcard-icon">
+          <svg viewBox="0 0 48 48" fill="none"><rect width="48" height="48" rx="12" fill="white" fill-opacity="0.2"/><rect x="12" y="12" width="24" height="24" rx="7" stroke="white" stroke-width="2.5"/><circle cx="24" cy="24" r="6" stroke="white" stroke-width="2.5"/><circle cx="31.5" cy="16.5" r="1.5" fill="white"/></svg>
+        </div>
+        <h3>Instagram</h3>
+        <p>Followers & Reels views badhao</p>
+        <div class="pcard-arrow">→</div>
+      </div>
+
+      <div class="pcard pcard-fb" onclick="selectPlatform('facebook', this)">
+        <div class="pcard-icon">
+          <svg viewBox="0 0 48 48" fill="none"><rect width="48" height="48" rx="12" fill="white" fill-opacity="0.2"/><path d="M28 13h-3a5 5 0 0 0-5 5v3h-3v4h3v9h4v-9h3l1-4h-4v-3a1 1 0 0 1 1-1h3v-4z" fill="white"/></svg>
+        </div>
+        <h3>Facebook</h3>
+        <p>Page likes & Video views badhao</p>
+        <div class="pcard-arrow">→</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================
+       SECTION 2: OBJECTIVE
+  ============================= -->
+  <section class="section-block reveal-section" id="objectiveSection">
+    <div class="section-title">
+      <span class="chip">Step 2</span>
+      <h2>Kya Badhana Hai?</h2>
+      <p id="objSubtitle">Apna objective choose karo</p>
+    </div>
+
+    <div class="obj-cards" id="objCards">
+      <!-- Rendered by JS based on platform -->
+    </div>
+  </section>
+
+  <!-- ============================
+       SECTION 3: PLAN
+  ============================= -->
+  <section class="section-block reveal-section" id="planSection">
+    <div class="section-title">
+      <span class="chip">Step 3</span>
+      <h2>Plan Choose Karo</h2>
+      <p id="planSubtitle">Kitne chahiye?</p>
+    </div>
+
+    <div class="plan-cards" id="planCards">
+      <!-- Rendered by JS -->
+    </div>
+  </section>
+
+  <!-- ============================
+       SECTION 4: LINK + EMAIL
+  ============================= -->
+  <section class="section-block reveal-section" id="detailsSection">
+    <div class="section-title">
+      <span class="chip">Step 4</span>
+      <h2>Apni Details Do</h2>
+      <p>Link aur email enter karo</p>
+    </div>
+
+    <div class="details-form">
+      <div class="form-group">
+        <label id="linkLabel">🔗 Profile / Video URL</label>
+        <input type="url" id="userLink" placeholder="https://www.instagram.com/yourprofile" />
+        <span class="hint">Jis page/video pe promotion chahiye uska link do</span>
+      </div>
+      <div class="form-group">
+        <label>📧 Email Address</label>
+        <input type="email" id="userEmail" placeholder="aapka@email.com" />
+        <span class="hint">Order confirmation aur updates yahan aayenge</span>
+      </div>
+      <button class="btn-proceed" onclick="proceedToPayment()">
+        Proceed to Payment →
+      </button>
+    </div>
+  </section>
+
+  <!-- ============================
+       SECTION 5: CONFIRM + PAY
+  ============================= -->
+  <section class="section-block reveal-section" id="paySection">
+    <div class="section-title">
+      <span class="chip">Step 5</span>
+      <h2>Confirm &amp; Pay</h2>
+      <p>Sab kuch check karo aur payment karo</p>
+    </div>
+
+    <div class="pay-layout">
+      <div class="order-summary" id="orderSummary">
+        <!-- Rendered by JS -->
+      </div>
+      <div class="pay-box">
+        <div class="pay-amount-display">
+          <span>Total Amount</span>
+          <strong id="displayAmount">₹0</strong>
+        </div>
+        <button class="btn-pay" onclick="initiatePayment()">
+          <span>🔒 Secure Payment Karo</span>
+          <span id="payAmountBtn">₹0</span>
+        </button>
+        <div class="trust-badges">
+          <span>✅ SSL Secure</span>
+          <span>🏦 Razorpay</span>
+          <span>↩️ Refund Policy</span>
+        </div>
+        <p class="upi-note">UPI · Credit/Debit Card · Net Banking · Wallet — sab accept hota hai</p>
       </div>
     </div>
   </section>
 
-  <!-- HOW IT WORKS -->
-  <section class="how-it-works" id="how">
-    <div class="section-label">Simple Process</div>
-    <h2>Kaise Kaam Karta Hai?</h2>
-    <p class="section-sub">5 simple steps mein aapki promotion shuru ho jaati hai</p>
-
-    <div class="how-grid">
-      <div class="how-card">
-        <div class="how-num">01</div>
-        <div class="how-icon">📱</div>
-        <h4>Platform Choose</h4>
-        <p>Meta ya YouTube select karo aur objective batao</p>
-      </div>
-      <div class="how-arrow">→</div>
-      <div class="how-card">
-        <div class="how-num">02</div>
-        <div class="how-icon">🔗</div>
-        <h4>Link Submit</h4>
-        <p>Apna video ya profile link aur email do</p>
-      </div>
-      <div class="how-arrow">→</div>
-      <div class="how-card">
-        <div class="how-num">03</div>
-        <div class="how-icon">💳</div>
-        <h4>Payment Karo</h4>
-        <p>Plan choose karo, Razorpay se secure payment</p>
-      </div>
-      <div class="how-arrow">→</div>
-      <div class="how-card">
-        <div class="how-num">04</div>
-        <div class="how-icon">🚀</div>
-        <h4>Campaign Live</h4>
-        <p>24 ghante mein campaign shuru ho jaata hai</p>
-      </div>
-      <div class="how-arrow">→</div>
-      <div class="how-card">
-        <div class="how-num">05</div>
-        <div class="how-icon">📊</div>
-        <h4>Result Milta</h4>
-        <p>Campaign end par email pe stats milte hain</p>
-      </div>
+  <!-- ============================
+       HOW IT WORKS
+  ============================= -->
+  <section class="how-section" id="how">
+    <div class="section-title center">
+      <span class="chip">Simple Process</span>
+      <h2>Kaise Kaam Karta Hai?</h2>
     </div>
-  </section>
-
-  <!-- PRICING PREVIEW -->
-  <section class="pricing-preview">
-    <div class="section-label">Pricing</div>
-    <h2>Transparent Pricing</h2>
-    <p class="section-sub">Koi hidden charge nahi, jo dikhe wohi dena hai</p>
-    <div class="pricing-tabs">
-      <button class="tab active" onclick="switchTab('views', this)">👁️ Views Plans</button>
-      <button class="tab" onclick="switchTab('followers', this)">👥 Followers Plans</button>
+    <div class="how-steps">
+      <div class="how-step"><div class="how-num">1</div><div class="how-icon">📱</div><h4>Platform Choose</h4><p>YouTube, Instagram ya Facebook select karo</p></div>
+      <div class="how-line"></div>
+      <div class="how-step"><div class="how-num">2</div><div class="how-icon">🎯</div><h4>Objective Set</h4><p>Views ya Followers — kya chahiye batao</p></div>
+      <div class="how-line"></div>
+      <div class="how-step"><div class="how-num">3</div><div class="how-icon">📦</div><h4>Plan Select</h4><p>100 se 1000 tak — budget ke hisaab se chunein</p></div>
+      <div class="how-line"></div>
+      <div class="how-step"><div class="how-num">4</div><div class="how-icon">💳</div><h4>Payment Karo</h4><p>Razorpay se 100% safe — UPI bhi chalega</p></div>
+      <div class="how-line"></div>
+      <div class="how-step"><div class="how-num">5</div><div class="how-icon">🚀</div><h4>Growth Shuru!</h4><p>24 ghante mein campaign live, email pe update</p></div>
     </div>
-    <div class="pricing-grid" id="pricingGrid"></div>
-    <a href="#order" class="btn-primary-link">Abhi Order Karo →</a>
   </section>
 
   <!-- FAQ -->
-  <section class="faq-section">
-    <div class="section-label">FAQ</div>
-    <h2>Aksar Puche Jaane Wale Sawaal</h2>
-    <div class="faq-list">
-      <details class="faq-item">
-        <summary>Kya mujhe koi account banana hoga?</summary>
-        <p>Bilkul nahi! Sirf apna link aur email do, payment karo — bas ho gaya. Koi signup, koi login nahi.</p>
-      </details>
-      <details class="faq-item">
-        <summary>Campaign kitne time mein shuru hoga?</summary>
-        <p>Payment ke baad 24 ghante ke andar campaign live ho jaata hai. Start hone par aapko email aayega.</p>
-      </details>
-      <details class="faq-item">
-        <summary>Agar campaign fail ho gaya to?</summary>
-        <p>Agar kisi reason se campaign start nahi ho paata, aapko full refund diya jaata hai — same source pe 5-7 business days mein.</p>
-      </details>
-      <details class="faq-item">
-        <summary>Payment safe hai?</summary>
-        <p>Haan, payment Razorpay ke through hoti hai jo India ka #1 payment gateway hai. UPI, Card, Net Banking sab accept hota hai.</p>
-      </details>
-      <details class="faq-item">
-        <summary>Real views/followers milenge?</summary>
-        <p>Haan, campaigns Meta Ads aur Google Ads ke through run hote hain — genuine platform ads.</p>
-      </details>
+  <section class="faq-section" id="faq">
+    <div class="section-title center">
+      <span class="chip">FAQ</span>
+      <h2>Aksar Puche Jaane Wale Sawaal</h2>
     </div>
-  </section>
-
-  <!-- CTA BANNER -->
-  <section class="cta-banner">
-    <div class="cta-glow"></div>
-    <h2>Taiyaar Ho? Growth Shuru Karo Aaj Se!</h2>
-    <p>Sirf 2 minute lagenge — koi registration nahi, koi wait nahi.</p>
-    <a href="#order" class="btn-hero-primary">Abhi Start Karo →</a>
+    <div class="faq-list">
+      <details class="faq-item"><summary>Kya mujhe koi account banana hoga?</summary><p>Bilkul nahi! Sirf apna link aur email do, payment karo — bas ho gaya.</p></details>
+      <details class="faq-item"><summary>Campaign kitne time mein shuru hoga?</summary><p>Payment ke baad 24 ghante ke andar campaign live ho jaata hai. Start hone par aapko email aayega.</p></details>
+      <details class="faq-item"><summary>Agar campaign fail ho gaya to?</summary><p>Full refund diya jaata hai — same source pe 5-7 business days mein.</p></details>
+      <details class="faq-item"><summary>Payment safe hai?</summary><p>Haan, Razorpay ke through — India ka #1 payment gateway. UPI, Card, Net Banking sab accept.</p></details>
+      <details class="faq-item"><summary>Real views/followers milenge?</summary><p>Haan, Meta Ads aur Google Ads ke through run hote hain — genuine platform ads.</p></details>
+    </div>
   </section>
 
   <!-- FOOTER -->
   <footer>
-    <div class="footer-inner">
-      <div class="logo" style="font-size:1.3rem">⚡ BoostKaro</div>
-      <p style="color:#555;font-size:0.85rem;margin-top:6px">Social media promotion made simple.</p>
-      <div class="footer-links">
-        <a href="#">Terms &amp; Conditions</a>
-        <a href="#">Privacy Policy</a>
-        <a href="#">Refund Policy</a>
-        <a href="#">Contact</a>
-      </div>
-      <p class="footer-copy">© 2026 BoostKaro. All rights reserved.</p>
+    <div class="footer-top">
+      <div class="logo" style="font-size:1.5rem">⚡ BoostKaro</div>
+      <p>Social media promotion made simple. No login, no hassle.</p>
     </div>
+    <div class="footer-links">
+      <a href="#">Terms &amp; Conditions</a>
+      <a href="#">Privacy Policy</a>
+      <a href="#">Refund Policy</a>
+      <a href="#">Contact</a>
+    </div>
+    <p class="footer-copy">© 2026 BoostKaro. All rights reserved.</p>
   </footer>
 
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
