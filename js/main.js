@@ -11,17 +11,17 @@ const order = { platform: '', objective: '', plan: null, link: '', email: '' };
 // ---- PLAN DATA ---- (platform → objective → plans)
 const planData = {
   youtube: {
-    views: [
-      { qty: '100',   unit: 'Views',       dur: '1 day',   price: 99  },
-      { qty: '200',   unit: 'Views',       dur: '2 days',  price: 179 },
-      { qty: '500',   unit: 'Views',       dur: '3 days',  price: 399 },
-      { qty: '1,000', unit: 'Views',       dur: '5 days',  price: 699 },
+    shorts: [
+      { qty: '700–1,200',   unit: 'Shorts Views', dur: '2–3 days',  price: 100 },
+      { qty: '1,500–2,500', unit: 'Shorts Views', dur: '3–5 days',  price: 200 },
+      { qty: '4,000–7,000', unit: 'Shorts Views', dur: '5–7 days',  price: 500 },
+      { qty: '8,000–15,000',unit: 'Shorts Views', dur: '7–10 days', price: 999 },
     ],
-    subscribers: [
-      { qty: '100',   unit: 'Subscribers', dur: '5 days',  price: 299  },
-      { qty: '200',   unit: 'Subscribers', dur: '7 days',  price: 549  },
-      { qty: '500',   unit: 'Subscribers', dur: '10 days', price: 1199 },
-      { qty: '1,000', unit: 'Subscribers', dur: '15 days', price: 2199 },
+    longvideo: [
+      { qty: '300–500',   unit: 'Video Views', dur: '2–3 days',  price: 100 },
+      { qty: '600–1,000', unit: 'Video Views', dur: '3–5 days',  price: 200 },
+      { qty: '1,500–3,000',unit: 'Video Views', dur: '5–7 days',  price: 500 },
+      { qty: '3,000–6,000',unit: 'Video Views', dur: '7–10 days', price: 999 },
     ],
   },
   instagram: {
@@ -56,9 +56,9 @@ const planData = {
 
 // Objectives per platform
 const objectives = {
-  youtube:   [
-    { key: 'views',       icon: '👁️', label: 'Views',       sub: 'Video views badhao' },
-    { key: 'subscribers', icon: '🔔', label: 'Subscribers',  sub: 'Channel subscribers badhao' },
+  youtube: [
+    { key: 'shorts',    icon: '⚡', label: 'Shorts / Reels', sub: 'Short video par views badhao' },
+    { key: 'longvideo', icon: '▶️', label: 'Long Video',     sub: 'Long video par views badhao' },
   ],
   instagram: [
     { key: 'views',     icon: '▶️', label: 'Reel Views',   sub: 'Reels par views badhao' },
@@ -71,13 +71,13 @@ const objectives = {
 };
 
 const linkLabels = {
-  youtube:   { views: 'YouTube Video URL', subscribers: 'YouTube Channel URL' },
+  youtube:   { shorts: 'YouTube Shorts URL', longvideo: 'YouTube Video URL' },
   instagram: { views: 'Instagram Reel URL', followers: 'Instagram Profile URL' },
   facebook:  { views: 'Facebook Video URL', followers: 'Facebook Page URL' },
 };
 
 const linkPlaceholders = {
-  youtube:   { views: 'https://www.youtube.com/watch?v=...', subscribers: 'https://www.youtube.com/@channel' },
+  youtube:   { shorts: 'https://www.youtube.com/shorts/...', longvideo: 'https://www.youtube.com/watch?v=...' },
   instagram: { views: 'https://www.instagram.com/reel/...', followers: 'https://www.instagram.com/yourprofile' },
   facebook:  { views: 'https://www.facebook.com/video/...', followers: 'https://www.facebook.com/yourpage' },
 };
