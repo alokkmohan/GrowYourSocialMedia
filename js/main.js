@@ -189,14 +189,18 @@ function selectPlan(plan, cardEl) {
 // =============================================
 function proceedToPayment() {
   const link  = document.getElementById('userLink').value.trim();
+  const phone = document.getElementById('userPhone').value.trim();
   const email = document.getElementById('userEmail').value.trim();
 
-  if (!link)              return showError('Please enter the URL.');
-  if (!isValidUrl(link))  return showError('Please enter a valid URL (starting with https://).');
-  if (!email)             return showError('Please enter your email address.');
-  if (!isValidEmail(email)) return showError('Please enter a valid email address.');
+  if (!link)               return showError('Please enter the URL.');
+  if (!isValidUrl(link))   return showError('Please enter a valid URL (starting with https://).');
+  if (!phone)              return showError('Please enter your mobile number.');
+  if (!/^\d{10}$/.test(phone)) return showError('Please enter a valid 10-digit mobile number.');
+  if (!email)              return showError('Please enter your email address.');
+  if (!isValidEmail(email))  return showError('Please enter a valid email address.');
 
   order.link  = link;
+  order.phone = '+91' + phone;
   order.email = email;
 
   // Build summary
@@ -208,6 +212,7 @@ function proceedToPayment() {
     <div class="sum-row"><span>Service</span><span>${p.qty} ${p.unit}</span></div>
     <div class="sum-row"><span>Duration</span><span>${p.dur}</span></div>
     <div class="sum-row"><span>Link</span><span>${link}</span></div>
+    <div class="sum-row"><span>WhatsApp</span><span>+91 ${phone}</span></div>
     <div class="sum-row"><span>Email</span><span>${email}</span></div>
     <div class="sum-row"><span>Amount</span><span style="color:#10b981;font-size:1.1rem">₹${p.price.toLocaleString('en-IN')}</span></div>
   `;
@@ -234,7 +239,7 @@ function initiatePayment() {
     currency: 'INR',
     name:     'BoostKaro',
     description: `${p.qty} ${p.unit}`,
-    prefill:  { email: order.email },
+    prefill:  { email: order.email, contact: order.phone },
     notes: {
       platform:  order.platform,
       objective: order.objective,
@@ -256,7 +261,7 @@ function onPaymentSuccess(response, orderId) {
   const payload = {
     orderId, razorpayPaymentId: response.razorpay_payment_id,
     platform: order.platform, objective: order.objective,
-    link: order.link, email: order.email,
+    link: order.link, phone: order.phone, email: order.email,
     qty: p.qty, unit: p.unit, duration: p.dur, amount: p.price,
     timestamp: new Date().toISOString(),
   };
