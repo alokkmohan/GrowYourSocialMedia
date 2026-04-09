@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order Confirmed — BoostKaro</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .success-card {
+      max-width: 480px;
+      margin: 60px auto;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 40px 32px;
+      text-align: center;
+    }
+    .checkmark {
+      font-size: 4rem;
+      margin-bottom: 16px;
+    }
+    .success-card h1 {
+      font-size: 1.5rem;
+      color: #10b981;
+      margin-bottom: 8px;
+    }
+    .success-card p {
+      color: #888;
+      margin-bottom: 24px;
+    }
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #2a2a2a;
+      font-size: 0.9rem;
+    }
+    .detail-row span:first-child { color: #888; }
+    .detail-row span:last-child  { font-weight: 600; }
+    .home-btn {
+      display: inline-block;
+      margin-top: 28px;
+      background: #7c3aed;
+      color: #fff;
+      border-radius: 8px;
+      padding: 12px 28px;
+      text-decoration: none;
+      font-weight: 700;
+    }
+    .home-btn:hover { background: #6d28d9; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">⚡ BoostKaro</div>
+  </header>
+
+  <div class="success-card">
+    <div class="checkmark">✅</div>
+    <h1>Order Confirmed!</h1>
+    <p>Shukriya! Aapka order receive ho gaya. Confirmation email bheja ja raha hai.</p>
+
+    <div id="orderDetails"></div>
+
+    <p style="margin-top:20px; font-size:0.85rem; color:#888;">
+      Campaign <strong style="color:#a78bfa">24 ghante</strong> ke andar shuru hoga.<br/>
+      Result email pe milega.
+    </p>
+
+    <a href="index.html" class="home-btn">← Home</a>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const details = document.getElementById('orderDetails');
+
+    const rows = [
+      ['Order ID',  params.get('orderId') || '—'],
+      ['Plan',      params.get('plan')    || '—'],
+      ['Amount',    '₹' + (parseInt(params.get('amount')) || 0).toLocaleString('en-IN')],
+      ['Email',     params.get('email')   || '—'],
+    ];
+
+    details.innerHTML = rows.map(([k, v]) =>
+      `<div class="detail-row"><span>${k}</span><span>${v}</span></div>`
+    ).join('');
+  </script>
+</body>
+</html>
