@@ -35,9 +35,14 @@ const plans = {
 // STEP NAVIGATION
 // =============================================
 
+const progressMap = { 1: 20, 2: 40, 3: 60, 4: 80, 5: 100 };
+
 function showStep(n) {
   document.querySelectorAll('.step').forEach(s => s.classList.add('hidden'));
   document.getElementById('step' + n).classList.remove('hidden');
+  document.getElementById('progressFill').style.width = progressMap[n] + '%';
+  document.getElementById('progressLabel').textContent = `Step ${n} of 5`;
+  document.getElementById('order').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function goBack(currentStep) {
@@ -110,19 +115,54 @@ function renderPlans() {
   const grid = document.getElementById('plansGrid');
   grid.innerHTML = '';
 
+  const badges = ['', '', '🔥 Most Popular', ''];
   plans[order.objective].forEach((plan, i) => {
     const card = document.createElement('div');
     card.className = 'plan-card';
     card.innerHTML = `
+      ${badges[i] ? `<div class="plan-badge">${badges[i]}</div>` : ''}
       <div class="plan-name">${plan.name}</div>
       <div class="plan-quantity">${plan.quantity}</div>
-      <div class="plan-duration">${plan.unit} · ${plan.duration}</div>
+      <div class="plan-unit">${plan.unit}</div>
+      <div class="plan-duration">⏱ ${plan.duration}</div>
       <div class="plan-price">₹${plan.price.toLocaleString('en-IN')}</div>
     `;
     card.onclick = () => selectPlan(i, card);
     grid.appendChild(card);
   });
 }
+
+// =============================================
+// PRICING PREVIEW SECTION
+// =============================================
+
+function renderPricingPreview(objective) {
+  const grid = document.getElementById('pricingGrid');
+  grid.innerHTML = '';
+  const badges = ['', '', '🔥 Popular', ''];
+  plans[objective].forEach((plan, i) => {
+    const card = document.createElement('div');
+    card.className = 'price-card' + (i === 2 ? ' featured' : '');
+    card.innerHTML = `
+      ${badges[i] ? `<div class="price-badge">${badges[i]}</div>` : ''}
+      <div class="p-name">${plan.name}</div>
+      <div class="p-qty">${plan.quantity}</div>
+      <div class="p-unit">${plan.unit}</div>
+      <div class="p-dur">⏱ ${plan.duration}</div>
+      <div class="p-price">₹${plan.price.toLocaleString('en-IN')}</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function switchTab(objective, tabEl) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  tabEl.classList.add('active');
+  renderPricingPreview(objective);
+}
+
+// Init pricing preview on load
+document.addEventListener('DOMContentLoaded', () => renderPricingPreview('views'));
 
 function selectPlan(index, cardEl) {
   order.plan = plans[order.objective][index];
