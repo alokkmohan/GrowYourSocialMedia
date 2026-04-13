@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,6 +8,24 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .lang-toggle-btn {
+      background: transparent;
+      border: 1.5px solid var(--accent);
+      color: var(--accent);
+      border-radius: 6px;
+      padding: 4px 12px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s;
+      letter-spacing: 0.04em;
+    }
+    .lang-toggle-btn:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+  </style>
 </head>
 <body>
 
@@ -16,10 +34,11 @@
     <div class="nav-inner">
       <a href="index.html" class="logo">⚡ BoostKaro</a>
       <div class="nav-links">
-        <a href="#how">How it Works</a>
-        <a href="#faq">FAQ</a>
-        <a href="blog.html">Blog</a>
-        <a href="#platforms" class="nav-cta">Start Now →</a>
+        <a href="#how" data-hi="How it Works" data-en="How it Works">How it Works</a>
+        <a href="#faq" data-hi="FAQ" data-en="FAQ">FAQ</a>
+        <a href="blog.html" data-hi="Blog" data-en="Blog">Blog</a>
+        <a href="#platforms" class="nav-cta" data-hi="Start Now →" data-en="Start Now →">Start Now →</a>
+        <button class="lang-toggle-btn" id="langToggleBtn" title="Switch to English">EN</button>
       </div>
     </div>
   </nav>
@@ -28,14 +47,14 @@
   <section class="hero">
     <div class="hero-bg"></div>
     <div class="hero-content">
-      <div class="hero-badge">🚀 10,000+ Successful Orders</div>
-      <h1>Grow Your <span class="gradient-text">Social Media</span><br/>Without Any Hassle</h1>
-      <p>No login. No account. Sirf platform choose karo, plan lo, payment karo — 24 ghante mein live!</p>
+      <div class="hero-badge" data-hi="🚀 10,000+ Successful Orders" data-en="🚀 10,000+ Successful Orders">🚀 10,000+ Successful Orders</div>
+      <h1 data-hi-html="Grow Your <span class='gradient-text'>Social Media</span><br/>Without Any Hassle" data-en-html="Grow Your <span class='gradient-text'>Social Media</span><br/>Without Any Hassle">Grow Your <span class="gradient-text">Social Media</span><br/>Without Any Hassle</h1>
+      <p data-hi="No login. No account. Sirf platform choose karo, plan lo, payment karo — 24 ghante mein live!" data-en="No login. No account. Just choose your platform, pick a plan, pay — live within 24 hours!">No login. No account. Sirf platform choose karo, plan lo, payment karo — 24 ghante mein live!</p>
       <div class="hero-stats">
-        <div class="hstat"><strong>10K+</strong><span>Orders Done</span></div>
-        <div class="hstat"><strong>4.9★</strong><span>Rating</span></div>
-        <div class="hstat"><strong>24hr</strong><span>Go Live</span></div>
-        <div class="hstat"><strong>100%</strong><span>Safe</span></div>
+        <div class="hstat"><strong>10K+</strong><span data-hi="Orders Done" data-en="Orders Done">Orders Done</span></div>
+        <div class="hstat"><strong>4.9★</strong><span data-hi="Rating" data-en="Rating">Rating</span></div>
+        <div class="hstat"><strong>24hr</strong><span data-hi="Go Live" data-en="Go Live">Go Live</span></div>
+        <div class="hstat"><strong>100%</strong><span data-hi="Safe" data-en="Safe">Safe</span></div>
       </div>
     </div>
   </section>
@@ -45,9 +64,9 @@
   ============================= -->
   <section class="section-block" id="platforms">
     <div class="section-title">
-      <span class="chip">Step 1</span>
-      <h2>Platform Select Karo</h2>
-      <p>Kahan promote karna chahte ho?</p>
+      <span class="chip" data-hi="Step 1" data-en="Step 1">Step 1</span>
+      <h2 data-hi="Platform Select Karo" data-en="Choose Your Platform">Platform Select Karo</h2>
+      <p data-hi="Kahan promote karna chahte ho?" data-en="Where do you want to promote?">Kahan promote karna chahte ho?</p>
     </div>
 
     <div class="platform-cards">
@@ -57,7 +76,7 @@
           <svg viewBox="0 0 48 48" fill="none"><rect width="48" height="48" rx="12" fill="white" fill-opacity="0.2"/><path d="M38.5 16.5C38.1 14.9 36.8 13.6 35.2 13.2C32.4 12.5 24 12.5 24 12.5C24 12.5 15.6 12.5 12.8 13.2C11.2 13.6 9.9 14.9 9.5 16.5C8.8 19.3 8.8 24 8.8 24C8.8 24 8.8 28.7 9.5 31.5C9.9 33.1 11.2 34.4 12.8 34.8C15.6 35.5 24 35.5 24 35.5C24 35.5 32.4 35.5 35.2 34.8C36.8 34.4 38.1 33.1 38.5 31.5C39.2 28.7 39.2 24 39.2 24C39.2 24 39.2 19.3 38.5 16.5Z" fill="white"/><path d="M21 28.5L28.5 24L21 19.5V28.5Z" fill="#FF0000"/></svg>
         </div>
         <h3>YouTube</h3>
-        <p>Views & Subscribers badhao</p>
+        <p data-hi="Views & Subscribers badhao" data-en="Boost Views & Subscribers">Views & Subscribers badhao</p>
         <div class="pcard-arrow">→</div>
       </div>
 
@@ -66,7 +85,7 @@
           <svg viewBox="0 0 48 48" fill="none"><rect width="48" height="48" rx="12" fill="white" fill-opacity="0.2"/><rect x="12" y="12" width="24" height="24" rx="7" stroke="white" stroke-width="2.5"/><circle cx="24" cy="24" r="6" stroke="white" stroke-width="2.5"/><circle cx="31.5" cy="16.5" r="1.5" fill="white"/></svg>
         </div>
         <h3>Instagram</h3>
-        <p>Followers & Reels views badhao</p>
+        <p data-hi="Followers & Reels views badhao" data-en="Boost Followers & Reels Views">Followers & Reels views badhao</p>
         <div class="pcard-arrow">→</div>
       </div>
 
@@ -75,7 +94,7 @@
           <svg viewBox="0 0 48 48" fill="none"><rect width="48" height="48" rx="12" fill="white" fill-opacity="0.2"/><path d="M28 13h-3a5 5 0 0 0-5 5v3h-3v4h3v9h4v-9h3l1-4h-4v-3a1 1 0 0 1 1-1h3v-4z" fill="white"/></svg>
         </div>
         <h3>Facebook</h3>
-        <p>Page likes & Video views badhao</p>
+        <p data-hi="Page likes & Video views badhao" data-en="Boost Page Likes & Video Views">Page likes & Video views badhao</p>
         <div class="pcard-arrow">→</div>
       </div>
 
@@ -87,9 +106,9 @@
   ============================= -->
   <section class="section-block reveal-section" id="objectiveSection">
     <div class="section-title">
-      <span class="chip">Step 2</span>
-      <h2>Kya Badhana Hai?</h2>
-      <p id="objSubtitle">Apna objective choose karo</p>
+      <span class="chip" data-hi="Step 2" data-en="Step 2">Step 2</span>
+      <h2 data-hi="Kya Badhana Hai?" data-en="What Do You Want to Grow?">Kya Badhana Hai?</h2>
+      <p id="objSubtitle" data-hi="Apna objective choose karo" data-en="Choose your objective">Apna objective choose karo</p>
     </div>
 
     <div class="obj-cards" id="objCards">
@@ -102,9 +121,9 @@
   ============================= -->
   <section class="section-block reveal-section" id="planSection">
     <div class="section-title">
-      <span class="chip">Step 3</span>
-      <h2>Plan Choose Karo</h2>
-      <p id="planSubtitle">Kitne chahiye?</p>
+      <span class="chip" data-hi="Step 3" data-en="Step 3">Step 3</span>
+      <h2 data-hi="Plan Choose Karo" data-en="Choose a Plan">Plan Choose Karo</h2>
+      <p id="planSubtitle" data-hi="Kitne chahiye?" data-en="How many do you need?">Kitne chahiye?</p>
     </div>
 
     <div class="plan-cards" id="planCards">
@@ -117,32 +136,41 @@
   ============================= -->
   <section class="section-block reveal-section" id="detailsSection">
     <div class="section-title">
-      <span class="chip">Step 4</span>
-      <h2>Apni Details Do</h2>
-      <p>Link aur email enter karo</p>
+      <span class="chip" data-hi="Step 4" data-en="Step 4">Step 4</span>
+      <h2 data-hi="Apni Details Do" data-en="Enter Your Details">Apni Details Do</h2>
+      <p data-hi="Link aur email enter karo" data-en="Enter your link and email">Link aur email enter karo</p>
     </div>
 
     <div class="details-form">
       <div class="form-group">
-        <label id="linkLabel">🔗 Profile / Video URL</label>
-        <input type="url" id="userLink" placeholder="https://www.instagram.com/yourprofile" />
-        <span class="hint">Jis page/video pe promotion chahiye uska link do</span>
+        <label id="linkLabel" data-hi="🔗 Profile / Video URL" data-en="🔗 Profile / Video URL">🔗 Profile / Video URL</label>
+        <input type="url" id="userLink"
+          data-hi-placeholder="https://www.instagram.com/yourprofile"
+          data-en-placeholder="https://www.instagram.com/yourprofile"
+          placeholder="https://www.instagram.com/yourprofile" />
+        <span class="hint" data-hi="Jis page/video pe promotion chahiye uska link do" data-en="Paste the link of the page/video you want to promote">Jis page/video pe promotion chahiye uska link do</span>
       </div>
       <div class="form-group">
-        <label>📱 Mobile Number <span class="whatsapp-tag">WhatsApp Preferred</span></label>
+        <label data-hi="📱 Mobile Number" data-en="📱 Mobile Number">📱 Mobile Number <span class="whatsapp-tag">WhatsApp Preferred</span></label>
         <div class="phone-input-wrap">
           <span class="phone-prefix">+91</span>
-          <input type="tel" id="userPhone" placeholder="98765 43210" maxlength="10" />
+          <input type="tel" id="userPhone"
+            data-hi-placeholder="98765 43210"
+            data-en-placeholder="98765 43210"
+            placeholder="98765 43210" maxlength="10" />
         </div>
-        <span class="hint">WhatsApp pe order updates milenge</span>
+        <span class="hint" data-hi="WhatsApp pe order updates milenge" data-en="You will receive order updates on WhatsApp">WhatsApp pe order updates milenge</span>
       </div>
       <div class="form-group">
-        <label>📧 Email Address</label>
-        <input type="email" id="userEmail" placeholder="aapka@email.com" />
-        <span class="hint">Order confirmation aur updates yahan aayenge</span>
+        <label data-hi="📧 Email Address" data-en="📧 Email Address">📧 Email Address</label>
+        <input type="email" id="userEmail"
+          data-hi-placeholder="aapka@email.com"
+          data-en-placeholder="your@email.com"
+          placeholder="aapka@email.com" />
+        <span class="hint" data-hi="Order confirmation aur updates yahan aayenge" data-en="Order confirmation and updates will be sent here">Order confirmation aur updates yahan aayenge</span>
       </div>
       <button class="btn-proceed" onclick="proceedToPayment()">
-        Proceed to Payment →
+        <span data-hi="Proceed to Payment →" data-en="Proceed to Payment →">Proceed to Payment →</span>
       </button>
     </div>
   </section>
@@ -152,9 +180,9 @@
   ============================= -->
   <section class="section-block reveal-section" id="paySection">
     <div class="section-title">
-      <span class="chip">Step 5</span>
-      <h2>Confirm &amp; Pay</h2>
-      <p>Sab kuch check karo aur payment karo</p>
+      <span class="chip" data-hi="Step 5" data-en="Step 5">Step 5</span>
+      <h2 data-hi="Confirm &amp; Pay" data-en="Confirm &amp; Pay">Confirm &amp; Pay</h2>
+      <p data-hi="Sab kuch check karo aur payment karo" data-en="Review your order and complete payment">Sab kuch check karo aur payment karo</p>
     </div>
 
     <div class="pay-layout">
@@ -163,19 +191,19 @@
       </div>
       <div class="pay-box">
         <div class="pay-amount-display">
-          <span>Total Amount</span>
+          <span data-hi="Total Amount" data-en="Total Amount">Total Amount</span>
           <strong id="displayAmount">₹0</strong>
         </div>
         <button class="btn-pay" onclick="initiatePayment()">
-          <span>🔒 Secure Payment Karo</span>
+          <span data-hi="🔒 Secure Payment Karo" data-en="🔒 Pay Securely">🔒 Secure Payment Karo</span>
           <span id="payAmountBtn">₹0</span>
         </button>
         <div class="trust-badges">
-          <span>✅ SSL Secure</span>
+          <span data-hi="✅ SSL Secure" data-en="✅ SSL Secure">✅ SSL Secure</span>
           <span>🏦 Razorpay</span>
-          <span>↩️ Refund Policy</span>
+          <span data-hi="↩️ Refund Policy" data-en="↩️ Refund Policy">↩️ Refund Policy</span>
         </div>
-        <p class="upi-note">UPI · Credit/Debit Card · Net Banking · Wallet — sab accept hota hai</p>
+        <p class="upi-note" data-hi="UPI · Credit/Debit Card · Net Banking · Wallet — sab accept hota hai" data-en="UPI · Credit/Debit Card · Net Banking · Wallet — all accepted">UPI · Credit/Debit Card · Net Banking · Wallet — sab accept hota hai</p>
       </div>
     </div>
   </section>
@@ -185,19 +213,44 @@
   ============================= -->
   <section class="how-section" id="how">
     <div class="section-title center">
-      <span class="chip">Simple Process</span>
-      <h2>Kaise Kaam Karta Hai?</h2>
+      <span class="chip" data-hi="Simple Process" data-en="Simple Process">Simple Process</span>
+      <h2 data-hi="Kaise Kaam Karta Hai?" data-en="How Does It Work?">Kaise Kaam Karta Hai?</h2>
     </div>
     <div class="how-steps">
-      <div class="how-step"><div class="how-num">1</div><div class="how-icon">📱</div><h4>Platform Choose</h4><p>YouTube, Instagram ya Facebook select karo</p></div>
+      <div class="how-step">
+        <div class="how-num">1</div>
+        <div class="how-icon">📱</div>
+        <h4 data-hi="Platform Choose" data-en="Choose Platform">Platform Choose</h4>
+        <p data-hi="YouTube, Instagram ya Facebook select karo" data-en="Select YouTube, Instagram or Facebook">YouTube, Instagram ya Facebook select karo</p>
+      </div>
       <div class="how-line"></div>
-      <div class="how-step"><div class="how-num">2</div><div class="how-icon">🎯</div><h4>Objective Set</h4><p>Views ya Followers — kya chahiye batao</p></div>
+      <div class="how-step">
+        <div class="how-num">2</div>
+        <div class="how-icon">🎯</div>
+        <h4 data-hi="Objective Set" data-en="Set Objective">Objective Set</h4>
+        <p data-hi="Views ya Followers — kya chahiye batao" data-en="Tell us what you need — Views or Followers">Views ya Followers — kya chahiye batao</p>
+      </div>
       <div class="how-line"></div>
-      <div class="how-step"><div class="how-num">3</div><div class="how-icon">📦</div><h4>Plan Select</h4><p>100 se 1000 tak — budget ke hisaab se chunein</p></div>
+      <div class="how-step">
+        <div class="how-num">3</div>
+        <div class="how-icon">📦</div>
+        <h4 data-hi="Plan Select" data-en="Select Plan">Plan Select</h4>
+        <p data-hi="100 se 1000 tak — budget ke hisaab se chunein" data-en="100 to 1000 — pick a plan that fits your budget">100 se 1000 tak — budget ke hisaab se chunein</p>
+      </div>
       <div class="how-line"></div>
-      <div class="how-step"><div class="how-num">4</div><div class="how-icon">💳</div><h4>Payment Karo</h4><p>Razorpay se 100% safe — UPI bhi chalega</p></div>
+      <div class="how-step">
+        <div class="how-num">4</div>
+        <div class="how-icon">💳</div>
+        <h4 data-hi="Payment Karo" data-en="Make Payment">Payment Karo</h4>
+        <p data-hi="Razorpay se 100% safe — UPI bhi chalega" data-en="100% safe via Razorpay — UPI accepted too">Razorpay se 100% safe — UPI bhi chalega</p>
+      </div>
       <div class="how-line"></div>
-      <div class="how-step"><div class="how-num">5</div><div class="how-icon">🚀</div><h4>Growth Shuru!</h4><p>24 ghante mein campaign live, email pe update</p></div>
+      <div class="how-step">
+        <div class="how-num">5</div>
+        <div class="how-icon">🚀</div>
+        <h4 data-hi="Growth Shuru!" data-en="Growth Starts!">Growth Shuru!</h4>
+        <p data-hi="24 ghante mein campaign live, email pe update" data-en="Campaign goes live within 24 hours, updates via email">24 ghante mein campaign live, email pe update</p>
+      </div>
     </div>
   </section>
 
@@ -205,14 +258,29 @@
   <section class="faq-section" id="faq">
     <div class="section-title center">
       <span class="chip">FAQ</span>
-      <h2>Aksar Puche Jaane Wale Sawaal</h2>
+      <h2 data-hi="Aksar Puche Jaane Wale Sawaal" data-en="Frequently Asked Questions">Aksar Puche Jaane Wale Sawaal</h2>
     </div>
     <div class="faq-list">
-      <details class="faq-item"><summary>Kya mujhe koi account banana hoga?</summary><p>Bilkul nahi! Sirf apna link aur email do, payment karo — bas ho gaya.</p></details>
-      <details class="faq-item"><summary>Campaign kitne time mein shuru hoga?</summary><p>Payment ke baad 24 ghante ke andar campaign live ho jaata hai. Start hone par aapko email aayega.</p></details>
-      <details class="faq-item"><summary>Agar campaign fail ho gaya to?</summary><p>Full refund diya jaata hai — same source pe 5-7 business days mein.</p></details>
-      <details class="faq-item"><summary>Payment safe hai?</summary><p>Haan, Razorpay ke through — India ka #1 payment gateway. UPI, Card, Net Banking sab accept.</p></details>
-      <details class="faq-item"><summary>Real views/followers milenge?</summary><p>Haan, Meta Ads aur Google Ads ke through run hote hain — genuine platform ads.</p></details>
+      <details class="faq-item">
+        <summary data-hi="Kya mujhe koi account banana hoga?" data-en="Do I need to create an account?">Kya mujhe koi account banana hoga?</summary>
+        <p data-hi="Bilkul nahi! Sirf apna link aur email do, payment karo — bas ho gaya." data-en="Not at all! Just provide your link and email, make the payment — that's it.">Bilkul nahi! Sirf apna link aur email do, payment karo — bas ho gaya.</p>
+      </details>
+      <details class="faq-item">
+        <summary data-hi="Campaign kitne time mein shuru hoga?" data-en="When will the campaign start?">Campaign kitne time mein shuru hoga?</summary>
+        <p data-hi="Payment ke baad 24 ghante ke andar campaign live ho jaata hai. Start hone par aapko email aayega." data-en="The campaign goes live within 24 hours of payment. You'll receive an email when it starts.">Payment ke baad 24 ghante ke andar campaign live ho jaata hai. Start hone par aapko email aayega.</p>
+      </details>
+      <details class="faq-item">
+        <summary data-hi="Agar campaign fail ho gaya to?" data-en="What if the campaign fails?">Agar campaign fail ho gaya to?</summary>
+        <p data-hi="Full refund diya jaata hai — same source pe 5-7 business days mein." data-en="A full refund is issued to the same source within 5-7 business days.">Full refund diya jaata hai — same source pe 5-7 business days mein.</p>
+      </details>
+      <details class="faq-item">
+        <summary data-hi="Payment safe hai?" data-en="Is payment safe?">Payment safe hai?</summary>
+        <p data-hi="Haan, Razorpay ke through — India ka #1 payment gateway. UPI, Card, Net Banking sab accept." data-en="Yes, via Razorpay — India's #1 payment gateway. UPI, Card, Net Banking all accepted.">Haan, Razorpay ke through — India ka #1 payment gateway. UPI, Card, Net Banking sab accept.</p>
+      </details>
+      <details class="faq-item">
+        <summary data-hi="Real views/followers milenge?" data-en="Will I get real views/followers?">Real views/followers milenge?</summary>
+        <p data-hi="Haan, Meta Ads aur Google Ads ke through run hote hain — genuine platform ads." data-en="Yes, campaigns run through Meta Ads and Google Ads — genuine platform advertisements.">Haan, Meta Ads aur Google Ads ke through run hote hain — genuine platform ads.</p>
+      </details>
     </div>
   </section>
 
@@ -220,14 +288,14 @@
   <footer>
     <div class="footer-top">
       <a href="index.html" class="logo" style="font-size:1.5rem">⚡ BoostKaro</a>
-      <p>Social media promotion made simple. No login, no hassle.</p>
+      <p data-hi="Social media promotion made simple. No login, no hassle." data-en="Social media promotion made simple. No login, no hassle.">Social media promotion made simple. No login, no hassle.</p>
     </div>
     <div class="footer-links">
-      <a href="blog.html">Blog</a>
-      <a href="terms.html">Terms &amp; Conditions</a>
-      <a href="privacy.html">Privacy Policy</a>
-      <a href="refund.html">Refund Policy</a>
-      <a href="mailto:alokkmohan@zohomail.in">Contact</a>
+      <a href="blog.html" data-hi="Blog" data-en="Blog">Blog</a>
+      <a href="terms.html" data-hi="Terms &amp; Conditions" data-en="Terms &amp; Conditions">Terms &amp; Conditions</a>
+      <a href="privacy.html" data-hi="Privacy Policy" data-en="Privacy Policy">Privacy Policy</a>
+      <a href="refund.html" data-hi="Refund Policy" data-en="Refund Policy">Refund Policy</a>
+      <a href="mailto:alokkmohan@zohomail.in" data-hi="Contact" data-en="Contact">Contact</a>
     </div>
     <p class="footer-copy">© 2026 BoostKaro. All rights reserved.</p>
   </footer>
@@ -237,37 +305,37 @@
     <link rel="stylesheet" href="css/blog.css" />
     <div class="blog-preview-header">
       <div>
-        <span class="chip">Free Tips</span>
-        <h2>Social Media Growth Guide</h2>
+        <span class="chip" data-hi="Free Tips" data-en="Free Tips">Free Tips</span>
+        <h2 data-hi="Social Media Growth Guide" data-en="Social Media Growth Guide">Social Media Growth Guide</h2>
       </div>
-      <a href="blog.html">Sabhi Articles →</a>
+      <a href="blog.html" data-hi="Sabhi Articles →" data-en="All Articles →">Sabhi Articles →</a>
     </div>
     <div class="blog-preview-grid">
       <a href="blog/youtube-shorts-views.html" class="blog-card">
         <div class="blog-card-thumb" style="background:linear-gradient(135deg,#ff000018,#cc000008)">▶️</div>
         <div class="blog-card-body">
           <span class="blog-tag">YouTube</span>
-          <h2>YouTube Shorts Se Views Kaise Badhaye — 2026 Guide</h2>
-          <p>Shorts algorithm, best time to post aur views badhane ke proven tips.</p>
-          <div class="blog-card-meta"><span>⏱ 5 min</span><span class="read-more">Read →</span></div>
+          <h2 data-hi="YouTube Shorts Se Views Kaise Badhaye — 2026 Guide" data-en="How to Get More Views on YouTube Shorts — 2026 Guide">YouTube Shorts Se Views Kaise Badhaye — 2026 Guide</h2>
+          <p data-hi="Shorts algorithm, best time to post aur views badhane ke proven tips." data-en="Shorts algorithm, best time to post, and proven tips to grow your views.">Shorts algorithm, best time to post aur views badhane ke proven tips.</p>
+          <div class="blog-card-meta"><span>⏱ 5 min</span><span class="read-more" data-hi="Read →" data-en="Read →">Read →</span></div>
         </div>
       </a>
       <a href="blog/instagram-followers.html" class="blog-card">
         <div class="blog-card-thumb" style="background:linear-gradient(135deg,#e6683c18,#bc188808)">📸</div>
         <div class="blog-card-body">
           <span class="blog-tag">Instagram</span>
-          <h2>Instagram Par Followers Badhane Ke 10 Proven Tips</h2>
-          <p>Organic followers, bio optimization aur consistent growth strategy.</p>
-          <div class="blog-card-meta"><span>⏱ 6 min</span><span class="read-more">Read →</span></div>
+          <h2 data-hi="Instagram Par Followers Badhane Ke 10 Proven Tips" data-en="10 Proven Tips to Grow Instagram Followers">Instagram Par Followers Badhane Ke 10 Proven Tips</h2>
+          <p data-hi="Organic followers, bio optimization aur consistent growth strategy." data-en="Organic followers, bio optimization, and a consistent growth strategy.">Organic followers, bio optimization aur consistent growth strategy.</p>
+          <div class="blog-card-meta"><span>⏱ 6 min</span><span class="read-more" data-hi="Read →" data-en="Read →">Read →</span></div>
         </div>
       </a>
       <a href="blog/reels-strategy.html" class="blog-card">
         <div class="blog-card-thumb" style="background:linear-gradient(135deg,#bc188818,#f0943308)">🎬</div>
         <div class="blog-card-body">
           <span class="blog-tag">Reels</span>
-          <h2>Reels Strategy: 0 Se 1 Lakh Views Kaise Paaye</h2>
-          <p>Hook likhna, trending audio aur reels viral karne ki complete strategy.</p>
-          <div class="blog-card-meta"><span>⏱ 7 min</span><span class="read-more">Read →</span></div>
+          <h2 data-hi="Reels Strategy: 0 Se 1 Lakh Views Kaise Paaye" data-en="Reels Strategy: How to Get 0 to 1 Lakh Views">Reels Strategy: 0 Se 1 Lakh Views Kaise Paaye</h2>
+          <p data-hi="Hook likhna, trending audio aur reels viral karne ki complete strategy." data-en="Writing hooks, trending audio, and a complete strategy to go viral.">Hook likhna, trending audio aur reels viral karne ki complete strategy.</p>
+          <div class="blog-card-meta"><span>⏱ 7 min</span><span class="read-more" data-hi="Read →" data-en="Read →">Read →</span></div>
         </div>
       </a>
     </div>
@@ -275,5 +343,6 @@
 
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script src="js/main.js"></script>
+  <script src="js/lang.js"></script>
 </body>
 </html>

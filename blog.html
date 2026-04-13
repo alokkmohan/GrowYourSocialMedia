@@ -9,6 +9,21 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/blog.css" />
+  <style>
+    .lang-toggle-btn {
+      background: transparent;
+      border: 1.5px solid var(--accent);
+      color: var(--accent);
+      border-radius: 6px;
+      padding: 4px 12px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s;
+      letter-spacing: 0.04em;
+    }
+    .lang-toggle-btn:hover { background: var(--accent); color: #fff; }
+  </style>
 </head>
 <body>
 
@@ -16,17 +31,18 @@
     <div class="nav-inner">
       <a href="index.html" class="logo">⚡ BoostKaro</a>
       <div class="nav-links">
-        <a href="index.html">Home</a>
-        <a href="blog.html" style="color:#7c3aed;font-weight:700;">Blog</a>
-        <a href="index.html#platforms" class="nav-cta">Start Now →</a>
+        <a href="index.html" data-hi="Home" data-en="Home">Home</a>
+        <a href="blog.html" style="color:#7c3aed;font-weight:700;" data-hi="Blog" data-en="Blog">Blog</a>
+        <a href="index.html#platforms" class="nav-cta" data-hi="Start Now →" data-en="Start Now →">Start Now →</a>
+        <button class="lang-toggle-btn" id="langToggleBtn" title="Switch to English">EN</button>
       </div>
     </div>
   </nav>
 
   <div class="blog-hero">
-    <span class="chip">Social Media Tips</span>
-    <h1>Growth Tips Hindi Mein 🚀</h1>
-    <p>YouTube, Instagram aur Facebook pe growth kaise karein — simple aur practical guides</p>
+    <span class="chip" data-hi="Social Media Tips" data-en="Social Media Tips">Social Media Tips</span>
+    <h1 data-hi="Growth Tips Hindi Mein 🚀" data-en="Social Media Growth Tips 🚀">Growth Tips Hindi Mein 🚀</h1>
+    <p data-hi="YouTube, Instagram aur Facebook pe growth kaise karein — simple aur practical guides" data-en="How to grow on YouTube, Instagram and Facebook — simple and practical guides">YouTube, Instagram aur Facebook pe growth kaise karein — simple aur practical guides</p>
   </div>
 
   <div class="blog-container">
@@ -36,12 +52,12 @@
         <div class="blog-card-thumb" style="background:linear-gradient(135deg,#ff000018,#cc000008)">▶️</div>
         <div class="blog-card-body">
           <span class="blog-tag">YouTube</span>
-          <h2>YouTube Shorts Se Views Kaise Badhaye — 2026 Complete Guide</h2>
-          <p>Shorts algorithm kaise kaam karta hai, best time to post, aur views badhane ke proven tips.</p>
+          <h2 data-hi="YouTube Shorts Se Views Kaise Badhaye — 2026 Complete Guide" data-en="How to Get More Views on YouTube Shorts — 2026 Complete Guide">YouTube Shorts Se Views Kaise Badhaye — 2026 Complete Guide</h2>
+          <p data-hi="Shorts algorithm kaise kaam karta hai, best time to post, aur views badhane ke proven tips." data-en="How the Shorts algorithm works, best time to post, and proven tips to grow views.">Shorts algorithm kaise kaam karta hai, best time to post, aur views badhane ke proven tips.</p>
           <div class="blog-card-meta">
             <span>👤 Alok Mohan</span>
             <span>⏱ 5 min read</span>
-            <span class="read-more">Read →</span>
+            <span class="read-more" data-hi="Read →" data-en="Read →">Read →</span>
           </div>
         </div>
       </a>
@@ -50,12 +66,12 @@
         <div class="blog-card-thumb" style="background:linear-gradient(135deg,#e6683c18,#bc188808)">📸</div>
         <div class="blog-card-body">
           <span class="blog-tag">Instagram</span>
-          <h2>Instagram Par Followers Badhane Ke 10 Proven Tips</h2>
-          <p>Organic followers kaise milte hain, bio optimization, aur consistent growth strategy.</p>
+          <h2 data-hi="Instagram Par Followers Badhane Ke 10 Proven Tips" data-en="10 Proven Tips to Grow Instagram Followers">Instagram Par Followers Badhane Ke 10 Proven Tips</h2>
+          <p data-hi="Organic followers kaise milte hain, bio optimization, aur consistent growth strategy." data-en="How to get organic followers, bio optimization, and a consistent growth strategy.">Organic followers kaise milte hain, bio optimization, aur consistent growth strategy.</p>
           <div class="blog-card-meta">
             <span>👤 Alok Mohan</span>
             <span>⏱ 6 min read</span>
-            <span class="read-more">Read →</span>
+            <span class="read-more" data-hi="Read →" data-en="Read →">Read →</span>
           </div>
         </div>
       </a>
@@ -64,12 +80,12 @@
         <div class="blog-card-thumb" style="background:linear-gradient(135deg,#bc188818,#f0943308)">🎬</div>
         <div class="blog-card-body">
           <span class="blog-tag">Reels</span>
-          <h2>Reels Strategy: 0 Se 1 Lakh Views Kaise Paaye</h2>
-          <p>Hook likhna, trending audio use karna, aur reels ko viral karne ki complete strategy.</p>
+          <h2 data-hi="Reels Strategy: 0 Se 1 Lakh Views Kaise Paaye" data-en="Reels Strategy: How to Go from 0 to 1 Lakh Views">Reels Strategy: 0 Se 1 Lakh Views Kaise Paaye</h2>
+          <p data-hi="Hook likhna, trending audio use karna, aur reels ko viral karne ki complete strategy." data-en="Writing hooks, using trending audio, and a complete strategy to go viral.">Hook likhna, trending audio use karna, aur reels ko viral karne ki complete strategy.</p>
           <div class="blog-card-meta">
             <span>👤 Alok Mohan</span>
             <span>⏱ 7 min read</span>
-            <span class="read-more">Read →</span>
+            <span class="read-more" data-hi="Read →" data-en="Read →">Read →</span>
           </div>
         </div>
       </a>
@@ -78,12 +94,12 @@
         <div class="blog-card-thumb" style="background:linear-gradient(135deg,#7c3aed18,#4f46e508)">💡</div>
         <div class="blog-card-body">
           <span class="blog-tag">Digital Marketing</span>
-          <h2>Digital Marketing Kya Hai — Beginners Ke Liye Hindi Guide</h2>
-          <p>Digital marketing ki basics, SEO, social media marketing aur paid ads ka introduction.</p>
+          <h2 data-hi="Digital Marketing Kya Hai — Beginners Ke Liye Hindi Guide" data-en="What is Digital Marketing — Beginner's Guide">Digital Marketing Kya Hai — Beginners Ke Liye Hindi Guide</h2>
+          <p data-hi="Digital marketing ki basics, SEO, social media marketing aur paid ads ka introduction." data-en="Basics of digital marketing, SEO, social media marketing, and an intro to paid ads.">Digital marketing ki basics, SEO, social media marketing aur paid ads ka introduction.</p>
           <div class="blog-card-meta">
             <span>👤 Alok Mohan</span>
             <span>⏱ 8 min read</span>
-            <span class="read-more">Read →</span>
+            <span class="read-more" data-hi="Read →" data-en="Read →">Read →</span>
           </div>
         </div>
       </a>
@@ -92,20 +108,20 @@
         <div class="blog-card-thumb" style="background:linear-gradient(135deg,#05966918,#04785708)">✍️</div>
         <div class="blog-card-body">
           <span class="blog-tag">Content Creation</span>
-          <h2>Content Creation Ideas: Channel Grow Karne Ke 20 Topics</h2>
-          <p>Kya banaye content mein? 20 evergreen ideas jo views aur engagement dono dete hain.</p>
+          <h2 data-hi="Content Creation Ideas: Channel Grow Karne Ke 20 Topics" data-en="Content Creation Ideas: 20 Topics to Grow Your Channel">Content Creation Ideas: Channel Grow Karne Ke 20 Topics</h2>
+          <p data-hi="Kya banaye content mein? 20 evergreen ideas jo views aur engagement dono dete hain." data-en="What to create? 20 evergreen ideas that drive both views and engagement.">Kya banaye content mein? 20 evergreen ideas jo views aur engagement dono dete hain.</p>
           <div class="blog-card-meta">
             <span>👤 Alok Mohan</span>
             <span>⏱ 4 min read</span>
-            <span class="read-more">Read →</span>
+            <span class="read-more" data-hi="Read →" data-en="Read →">Read →</span>
           </div>
         </div>
       </a>
 
       <div class="blog-card" style="background:#f9fafb;border-style:dashed;cursor:default;justify-content:center;align-items:center;text-align:center;padding:40px 24px;">
         <div style="font-size:2.5rem;margin-bottom:14px;">✍️</div>
-        <h2 style="color:#94a3b8;font-size:0.95rem;font-weight:600;">Aur Articles Aa Rahe Hain...</h2>
-        <p style="color:#cbd5e1;font-size:0.82rem;margin-top:6px;">Jaldi aayenge naye tips</p>
+        <h2 style="color:#94a3b8;font-size:0.95rem;font-weight:600;" data-hi="Aur Articles Aa Rahe Hain..." data-en="More Articles Coming Soon...">Aur Articles Aa Rahe Hain...</h2>
+        <p style="color:#cbd5e1;font-size:0.82rem;margin-top:6px;" data-hi="Jaldi aayenge naye tips" data-en="New tips coming soon">Jaldi aayenge naye tips</p>
       </div>
 
     </div>
@@ -122,5 +138,6 @@
     </div>
   </footer>
 
+  <script src="js/lang.js"></script>
 </body>
 </html>
