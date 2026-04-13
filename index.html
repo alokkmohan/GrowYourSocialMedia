@@ -1,42 +1,446 @@
 <!DOCTYPE html>
-<html lang="hi" prefix="og: http://ogp.me/ns#">
+<html lang="hi">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <!-- SEO Meta Tags -->
-  <title>BoostKaro — Alok Mohan के साथ Social Media Growth | YouTube, Instagram, Facebook Promotion</title>
-  <meta name="description" content="BoostKaro - Alok Mohan द्वारा बनाया गया Social Media Growth Platform। YouTube, Instagram, Facebook पर तेजी से Followers और Views बढ़ाएं। बिना Login के, सिर्फ Link दो - 24 घंटे में Live!">
-  <meta name="keywords" content="social media growth, youtube views, instagram followers, facebook promotion, hindi social media, alok mohan, social media marketing">
+  <title>Hindi Digital Learning Hub - Alok Mohan | YouTube, Instagram, Digital Marketing सीखो</title>
+  <meta name="description" content="Alok Mohan के साथ Social Media और Digital Marketing सीखो। YouTube Channel Growth, Instagram Followers, Digital Skills - सब कुछ Hindi में। Free और Practical Guide।">
+  <meta name="keywords" content="hindi digital marketing, youtube growth hindi, instagram followers, digital learning, alok mohan, hindi tutorial, social media growth">
   <meta name="author" content="Alok Mohan">
-  <meta name="theme-color" content="#7c3aed">
-  
-  <!-- Open Graph / Social Media -->
-  <meta property="og:type" content="website" />
-  <meta property="og:title" content="BoostKaro — Social Media Growth प्लेटफॉर्म | Alok Mohan" />
-  <meta property="og:description" content="YouTube, Instagram, Facebook पर Views और Followers बढ़ाएं। No Login. सिर्फ Link दो - Payment करो - 24 घंटे मे Live!" />
-  <meta property="og:locale" content="hi_IN" />
+  <meta name="theme-color" content="#2563eb">
   
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1e40af;
+      --secondary: #10b981;
+      --bg: #f8fafc;
+      --text: #1e293b;
+      --text-light: #64748b;
+      --border: #e2e8f0;
+      --radius: 12px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* NAV */
+    nav {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      padding: 16px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-inner {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--primary);
+      text-decoration: none;
+    }
+    .nav-links {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+    }
+    .nav-links a {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--primary); }
+    .nav-cta {
+      background: var(--primary) !important;
+      color: #fff !important;
+      padding: 10px 24px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    /* HERO */
+    .hero {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 80px 20px;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      font-weight: 900;
+      margin-bottom: 16px;
+      font-family: 'Poppins', sans-serif;
+      color: var(--text);
+    }
+    .hero p {
+      font-size: 1.1rem;
+      color: var(--text-light);
+      max-width: 600px;
+      margin: 0 auto 32px;
+      line-height: 1.8;
+    }
+    .hero-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 14px 32px;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4); }
+    .btn-secondary {
+      background: transparent;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+    }
+    .btn-secondary:hover { background: rgba(37, 99, 235, 0.08); }
+
+    /* SECTION */
+    .section {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 60px 20px;
+      border-top: 1px solid var(--border);
+    }
+    .section-title {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+      font-family: 'Poppins', sans-serif;
+    }
+    .section-subtitle {
+      font-size: 0.95rem;
+      color: var(--text-light);
+      margin-bottom: 40px;
+    }
+
+    /* GRID */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      margin-top: 32px;
+    }
+    .card {
+      background: #fff;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      transition: all 0.3s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .card:hover {
+      border-color: var(--primary);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.1);
+    }
+    .card-icon {
+      font-size: 2.4rem;
+      margin-bottom: 12px;
+    }
+    .card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+    .card p {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      line-height: 1.6;
+    }
+
+    /* ABOUT */
+    .about-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: center;
+      margin-top: 40px;
+    }
+    .about-text h3 {
+      font-size: 1.3rem;
+      margin-bottom: 16px;
+      font-weight: 700;
+    }
+    .about-text p {
+      font-size: 0.95rem;
+      color: var(--text-light);
+      margin-bottom: 16px;
+      line-height: 1.8;
+    }
+    .about-image {
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(16, 185, 129, 0.1));
+      border-radius: var(--radius);
+      padding: 40px;
+      text-align: center;
+      font-size: 4rem;
+    }
+
+    /* BLOG */
+    .blog-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 28px;
+      margin-top: 32px;
+    }
+    .blog-card {
+      background: #fff;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      border: 1.5px solid var(--border);
+      transition: all 0.3s;
+    }
+    .blog-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 28px rgba(37, 99, 235, 0.12);
+      border-color: var(--primary);
+    }
+    .blog-header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      padding: 24px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      min-height: 80px;
+      display: flex;
+      align-items: center;
+    }
+    .blog-content {
+      padding: 24px;
+    }
+    .blog-content p {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+    .blog-tag {
+      display: inline-block;
+      background: rgba(37, 99, 235, 0.1);
+      color: var(--primary);
+      padding: 4px 12px;
+      border-radius: 50px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    /* CTA SECTION */
+    .cta {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      border-radius: var(--radius);
+      padding: 60px 40px;
+      text-align: center;
+      margin-top: 60px;
+    }
+    .cta h2 {
+      font-size: 2rem;
+      margin-bottom: 12px;
+      font-family: 'Poppins', sans-serif;
+    }
+    .cta p {
+      font-size: 1rem;
+      margin-bottom: 28px;
+      opacity: 0.95;
+    }
+    .cta .btn {
+      background: #fff;
+      color: var(--primary);
+    }
+    .cta .btn:hover { transform: translateY(-2px); }
+
+    /* FOOTER */
+    footer {
+      background: #fff;
+      border-top: 1px solid var(--border);
+      padding: 40px 20px;
+      text-align: center;
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      .hero { padding: 60px 20px; }
+      .hero h1 { font-size: 2rem; }
+      .about-container { grid-template-columns: 1fr; gap: 32px; }
+      .btn { padding: 12px 24px; font-size: 0.95rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+      .cta { padding: 40px 20px; }
+      .cta h2 { font-size: 1.6rem; }
+    }
+  </style>
 </head>
 <body>
 
   <!-- NAV -->
   <nav>
     <div class="nav-inner">
-      <a href="index.html" class="logo">⚡ BoostKaro</a>
-      <p class="nav-tagline">Alok Mohan के साथ</p>
+      <a href="index.html" class="logo">📚 Hindi Learning Hub</a>
       <div class="nav-links">
-        <a href="#about">क्या है?</a>
-        <a href="#how">कैसे काम करता है?</a>
-        <a href="#why">क्यों BoostKaro?</a>
-        <a href="#platforms" class="nav-cta">शुरू करें →</a>
+        <a href="#learn">क्या सीखोगे?</a>
+        <a href="#about">मेरे बारे में</a>
+        <a href="#blog">Blog</a>
+        <a href="#cta" class="btn nav-cta">शुरू करो →</a>
       </div>
     </div>
   </nav>
+
+  <!-- HERO SECTION -->
+  <section class="hero">
+    <h1>Grow Your Social Media<br/>(Hindi Guide)</h1>
+    <p>
+      Agar aap YouTube, Instagram ya Digital Marketing seekhna chahte hain,<br/>
+      toh yahan aapko simple Hindi mein practical guide milegi.<br/>
+      <strong>Bilkul free aur actionable advice!</strong>
+    </p>
+    <div class="hero-buttons">
+      <button class="btn btn-primary" onclick="document.getElementById('learn').scrollIntoView({behavior:'smooth'})">
+        शुरू करो
+      </button>
+      <button class="btn btn-secondary" onclick="document.getElementById('blog').scrollIntoView({behavior:'smooth'})">
+        Blog पढ़ो
+      </button>
+    </div>
+  </section>
+
+  <!-- SECTION 1: WHAT YOU WILL LEARN -->
+  <section class="section" id="learn">
+    <h2 class="section-title">✅ क्या सीखोगे?</h2>
+    <p class="section-subtitle">तुम्हें जो भी सीखना चाहिए Social Media Growth के लिए</p>
+    
+    <div class="grid">
+      <div class="card">
+        <div class="card-icon">📺</div>
+        <h3>YouTube Channel Growth</h3>
+        <p>Subscribers कैसे बढ़ाएं। Views आएं कहां से। Algorithm को समझो। Monetization shuru karo।</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📱</div>
+        <h3>Instagram Growth</h3>
+        <p>Followers कैसे बढ़ाएं। Reels viral करो। Engagement बढ़ाओ। Monetization strategies।</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">💼</div>
+        <h3>Digital Marketing Basics</h3>
+        <p>Content strategy क्या है। SEO समझो। Ads कैसे चलाएं। Success metrics track करो।</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 2: ABOUT ME -->
+  <section class="section" id="about">
+    <h2 class="section-title">👤 मैं कौन हूँ?</h2>
+    <p class="section-subtitle">Alok Mohan - Hindi Digital Learning का Founder</p>
+    
+    <div class="about-container">
+      <div class="about-text">
+        <h3>Alok Mohan के बारे में</h3>
+        <p>
+          मैं Alok Mohan हूँ, और मैं simple Hindi में digital skills सिखाता हूँ।
+        </p>
+        <p>
+          मेरा मकसद है कि हर कोई Social Media को समझे - चाहे वो content creator हो या business owner।
+        </p>
+        <p>
+          10,000+ लोग पहले ही मेरे guidance से अपना Social Media grow कर चुके हैं।
+          अब आप भी!
+        </p>
+        <p>
+          सब कुछ practical है। Sab कुछ actionable है। सब कुछ free है।
+        </p>
+      </div>
+      <div class="about-image">
+        👨‍💻
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 3: BLOG / CONTENT -->
+  <section class="section" id="blog">
+    <h2 class="section-title">📝 Latest Blog Posts</h2>
+    <p class="section-subtitle">Hindi में practical guide और actionable tips</p>
+    
+    <div class="blog-grid">
+      <div class="blog-card">
+        <div class="blog-header">🚀 YouTube Channel को 1000 Subscribers तक कैसे ले जाते हैं?</div>
+        <div class="blog-content">
+          <p>Step-by-step guide जो YouTube के शुरुआती दिनों में काम आता है। Content quality से लेकर optimization तक सब कुछ।</p>
+          <a href="#" class="blog-tag">YouTube</a>
+        </div>
+      </div>
+
+      <div class="blog-card">
+        <div class="blog-header">📸 Instagram Reels से Unlimited Views कैसे पाएं?</div>
+        <div class="blog-content">
+          <p>Instagram Algorithm को समझो। अपने Reels को viral करने के लिए क्या करना चाहिए। सीक्रेट हैक्स और tips।</p>
+          <a href="#" class="blog-tag">Instagram</a>
+        </div>
+      </div>
+
+      <div class="blog-card">
+        <div class="blog-header">💡 Digital Marketing क्या है और शुरू कैसे करें?</div>
+        <div class="blog-content">
+          <p>Digital Marketing की basics। Social Media marketing vs paid ads। Beginner के लिए complete guide।</p>
+          <a href="#" class="blog-tag">Marketing</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 4: CTA -->
+  <section class="section">
+    <div class="cta" id="cta">
+      <h2>🎯 आपका Journey शुरू करो</h2>
+      <p>Abhi seekhna shuru karein aur apna social media grow karein। सब कुछ Hindi में, सब कुछ practical।</p>
+      <a href="#blog" class="btn btn-primary">Blog पढ़ना शुरू करो →</a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2026 <strong>Hindi Digital Learning Hub</strong> by Alok Mohan</p>
+    <p style="margin-top: 12px; font-size: 0.85rem;">
+      Made for Hindi Community | सस्ते में सीखो | Practical knowledge only
+    </p>
+  </footer>
+
+</body>
+</html>
 
   <!-- HERO -->
   <section class="hero">
