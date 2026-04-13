@@ -78,44 +78,133 @@ function extractYouTubeId(url) {
 }
 
 // =============================================
+// GOOGLE SHEET SETUP (pehli baar run karo)
+// =============================================
+function setupSheets() {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+
+  // ---- Sheet 1: Orders ----
+  let orders = ss.getSheetByName('Orders');
+  if (!orders) orders = ss.insertSheet('Orders');
+  else orders.clear();
+
+  const orderHeaders = [
+    'Order ID',       // A
+    'Date & Time',    // B
+    'Platform',       // C
+    'Service',        // D
+    'Quantity',       // E
+    'Duration',       // F
+    'Amount (₹)',     // G
+    'Payment ID',     // H
+    'Email',          // I
+    'Phone',          // J
+    'Link',           // K
+    'Views Before',   // L
+    'Views After',    // M
+    'Views Gained',   // N
+    'Campaign Status',// O
+    'Notes'           // P
+  ];
+  orders.appendRow(orderHeaders);
+
+  // Header styling
+  const hRange = orders.getRange(1, 1, 1, orderHeaders.length);
+  hRange.setFontWeight('bold')
+        .setBackground('#7c3aed')
+        .setFontColor('#ffffff')
+        .setHorizontalAlignment('center');
+
+  // Column widths
+  orders.setColumnWidth(1, 150);  // Order ID
+  orders.setColumnWidth(2, 140);  // Date & Time
+  orders.setColumnWidth(3, 100);  // Platform
+  orders.setColumnWidth(4, 130);  // Service
+  orders.setColumnWidth(5, 120);  // Quantity
+  orders.setColumnWidth(6, 100);  // Duration
+  orders.setColumnWidth(7, 90);   // Amount
+  orders.setColumnWidth(8, 180);  // Payment ID
+  orders.setColumnWidth(9, 170);  // Email
+  orders.setColumnWidth(10, 130); // Phone
+  orders.setColumnWidth(11, 280); // Link
+  orders.setColumnWidth(12, 110); // Views Before
+  orders.setColumnWidth(13, 100); // Views After
+  orders.setColumnWidth(14, 110); // Views Gained
+  orders.setColumnWidth(15, 130); // Campaign Status
+  orders.setColumnWidth(16, 200); // Notes
+
+  orders.setFrozenRows(1);
+
+  // ---- Sheet 2: Dashboard ----
+  let dash = ss.getSheetByName('Dashboard');
+  if (!dash) dash = ss.insertSheet('Dashboard');
+  else dash.clear();
+
+  const dashData = [
+    ['📊 BoostKaro Dashboard', ''],
+    ['', ''],
+    ['💰 Revenue', ''],
+    ['Total Revenue (₹)',      "=SUM(Orders!G2:G)"],
+    ['Avg Order Value (₹)',    "=IFERROR(AVERAGE(Orders!G2:G),0)"],
+    ['', ''],
+    ['📦 Orders', ''],
+    ['Total Orders',           "=COUNTA(Orders!A2:A)"],
+    ['Not Started',            "=COUNTIF(Orders!O2:O,\"Not Started\")"],
+    ['Running',                "=COUNTIF(Orders!O2:O,\"Running\")"],
+    ['Completed',              "=COUNTIF(Orders!O2:O,\"Completed\")"],
+    ['', ''],
+    ['📱 Platform Wise', ''],
+    ['YouTube Orders',         "=COUNTIF(Orders!C2:C,\"youtube\")"],
+    ['Instagram Orders',       "=COUNTIF(Orders!C2:C,\"instagram\")"],
+    ['Facebook Orders',        "=COUNTIF(Orders!C2:C,\"facebook\")"],
+    ['', ''],
+    ['📈 YouTube Revenue (₹)', "=SUMIF(Orders!C2:C,\"youtube\",Orders!G2:G)"],
+    ['📈 Instagram Revenue (₹)',"=SUMIF(Orders!C2:C,\"instagram\",Orders!G2:G)"],
+    ['📈 Facebook Revenue (₹)', "=SUMIF(Orders!C2:C,\"facebook\",Orders!G2:G)"],
+  ];
+
+  dash.getRange(1, 1, dashData.length, 2).setValues(dashData);
+
+  // Dashboard styling
+  dash.getRange('A1').setFontSize(16).setFontWeight('bold').setFontColor('#7c3aed');
+  ['A3','A7','A13'].forEach(cell => {
+    dash.getRange(cell).setFontWeight('bold').setFontColor('#374151').setBackground('#f1f5f9');
+  });
+  dash.setColumnWidth(1, 200);
+  dash.setColumnWidth(2, 150);
+
+  Logger.log('✅ Sheets setup complete!');
+}
+
+// =============================================
 // GOOGLE SHEET MEIN ORDER RECORD KARO
 // =============================================
 function recordOrder(data) {
-  const ss = SpreadsheetApp.openById(SHEET_ID);
-  let sheet = ss.getSheetByName(SHEET_NAME);
+  const ss    = SpreadsheetApp.openById(SHEET_ID);
+  const sheet = ss.getSheetByName('Orders');
 
   if (!sheet) {
-    sheet = ss.insertSheet(SHEET_NAME);
-    const headers = [
-      'Order ID', 'Timestamp', 'Platform', 'Objective', 'Qty', 'Unit',
-      'Duration', 'Amount (₹)', 'Razorpay Payment ID',
-      'Email', 'Phone', 'Link',
-      'Views Before', 'Views After', 'Views Gained',
-      'Campaign Status', 'Notes'
-    ];
-    sheet.appendRow(headers);
-    sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold').setBackground('#7c3aed').setFontColor('#ffffff');
-    sheet.setFrozenRows(1);
+    setupSheets(); // pehli baar auto setup
   }
 
-  sheet.appendRow([
+  const activeSheet = ss.getSheetByName('Orders');
+  activeSheet.appendRow([
     data.orderId              || '',
     new Date(data.timestamp)  || new Date(),
     data.platform             || '',
     data.objective            || '',
     data.qty                  || '',
-    data.unit                 || '',
     data.duration             || '',
     data.amount               || '',
     data.razorpayPaymentId    || '',
     data.email                || '',
     data.phone                || '',
     data.link                 || '',
-    data.viewsBefore          || '',  // Auto (YouTube) ya Manual (IG/FB)
-    '',                               // Views After  — campaign end par bharega
-    '',                               // Views Gained — auto calculate hoga
-    'Not Started',                    // Campaign Status
-    ''                                // Notes
+    data.viewsBefore          || '',
+    '',                            // Views After
+    '',                            // Views Gained
+    'Not Started',                 // Campaign Status
+    ''                             // Notes
   ]);
 }
 
