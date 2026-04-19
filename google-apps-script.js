@@ -1,382 +1,414 @@
-// =============================================
-// BoostKaro — Google Apps Script
-// =============================================
+// BoostKaro - Google Apps Script backend
+//
+// Deploy this file as a Web App and store secrets in Script Properties:
+// SHEET_ID
+// RAZORPAY_KEY_ID
+// RAZORPAY_KEY_SECRET
+// BUSINESS_NAME (optional)
+// SITE_URL (optional)
 
-const SHEET_ID        = 'APNI_SHEET_ID_YAHAN_DAALO';
-const SHEET_NAME      = 'Orders';
-const BUSINESS_NAME   = 'BoostKaro';
-const SITE_URL        = 'https://alokkmohan.github.io/GrowYourSocialMedia/';
+const DEFAULT_SHEET_NAME = 'Orders';
 
-// ⚠️ YouTube Data API Key (free mein milti hai Google Cloud Console se)
-// https://console.cloud.google.com → Enable "YouTube Data API v3" → Create API Key
-const YOUTUBE_API_KEY = 'APNI_YOUTUBE_API_KEY_YAHAN_DAALO';
+function doGet() {
+  return jsonResponse_({
+    success: true,
+    service: 'boostkaro-payments',
+    date: new Date().toISOString()
+  });
+}
 
-// =============================================
-// MAIN — POST webhook receive karo
-// =============================================
 function doPost(e) {
   try {
-    const data = JSON.parse(e.postData.contents);
+    const action = (e && e.parameter && e.parameter.action) || '';
+    const payload = parseJsonBody_(e);
 
-    // YouTube ke liye views before capture karo
-    if (data.platform === 'youtube') {
-      data.viewsBefore = getYouTubeViews(data.link);
-    } else {
-      // Instagram/Facebook — admin manually bharega
-      data.viewsBefore = 'Manual (check before starting)';
+    if (action === 'createOrder') {
+      return jsonResponse_(createOrder_(payload));
     }
 
-    recordOrder(data);
-    sendConfirmationEmail(data);
+    if (action === 'verifyPayment') {
+      return jsonResponse_(verifyPayment_(payload));
+    }
 
-    return ContentService
-      .createTextOutput(JSON.stringify({ status: 'success' }))
-      .setMimeType(ContentService.MimeType.JSON);
-
-  } catch (err) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ status: 'error', message: err.message }))
-      .setMimeType(ContentService.MimeType.JSON);
+    return jsonResponse_({
+      success: false,
+      message: 'Unknown action.'
+    });
+  } catch (error) {
+    return jsonResponse_({
+      success: false,
+      message: error.message
+    });
   }
 }
 
-// =============================================
-// YOUTUBE VIEW COUNT FETCH KARO
-// =============================================
-function getYouTubeViews(url) {
-  try {
-    const videoId = extractYouTubeId(url);
-    if (!videoId) return 'Could not extract video ID';
+function createOrder_(payload) {
+  validateOrderPayload_(payload);
 
-    const apiUrl = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=statistics&key=${YOUTUBE_API_KEY}`;
-    const response = UrlFetchApp.fetch(apiUrl);
-    const json = JSON.parse(response.getContentText());
+  const config = getConfig_();
+  const publicOrderId = 'BK' + Date.now();
+  const amountInPaise = Math.round(Number(payload.amount) * 100);
 
-    if (json.items && json.items.length > 0) {
-      return parseInt(json.items[0].statistics.viewCount);
+  const razorpayOrder = createRazorpayOrder_(config, {
+    amount: amountInPaise,
+    currency: 'INR',
+    receipt: publicOrderId,
+    notes: {
+      public_order_id: publicOrderId,
+      platform: payload.platform || '',
+      objective: payload.objective || '',
+      email: payload.email || '',
+      phone: payload.phone || ''
     }
-    return 'Video not found / Private';
+  });
 
-  } catch (err) {
-    return 'Fetch error: ' + err.message;
-  }
+  const rowData = {
+    orderId: publicOrderId,
+    razorpayOrderId: razorpayOrder.id,
+    razorpayPaymentId: '',
+    razorpaySignature: '',
+    timestamp: new Date().toISOString(),
+    platform: payload.platform || '',
+    service: payload.objective || '',
+    quantity: payload.qty || '',
+    duration: payload.duration || '',
+    amount: Number(payload.amount) || 0,
+    email: payload.email || '',
+    phone: payload.phone || '',
+    link: payload.link || '',
+    paymentStatus: 'Created',
+    verificationStatus: 'Pending',
+    campaignStatus: 'Not Started',
+    notes: payload.unit || ''
+  };
+
+  upsertOrderRow_(rowData);
+
+  return {
+    success: true,
+    publicOrderId: publicOrderId,
+    razorpayOrderId: razorpayOrder.id,
+    amount: amountInPaise,
+    currency: razorpayOrder.currency || 'INR'
+  };
 }
 
-// YouTube URL se Video ID extract karo
-// Handles: watch?v=, /shorts/, youtu.be/
-function extractYouTubeId(url) {
-  const patterns = [
-    /youtube\.com\/watch\?v=([^&\s]+)/,
-    /youtube\.com\/shorts\/([^?&\s]+)/,
-    /youtu\.be\/([^?&\s]+)/,
-  ];
-  for (const pattern of patterns) {
-    const match = url.match(pattern);
-    if (match) return match[1];
+function verifyPayment_(payload) {
+  const config = getConfig_();
+  validateVerificationPayload_(payload);
+
+  const row = findOrderRow_(payload.orderId);
+  if (!row) {
+    throw new Error('Order not found for verification.');
   }
+
+  const savedOrderId = row.razorpayOrderId;
+  if (!savedOrderId) {
+    throw new Error('Missing Razorpay order ID on server.');
+  }
+
+  const providedOrderId = payload.razorpayOrderId || '';
+  if (providedOrderId && providedOrderId !== savedOrderId) {
+    throw new Error('Razorpay order ID mismatch.');
+  }
+
+  const verified = verifySignature_(
+    savedOrderId,
+    payload.razorpayPaymentId,
+    payload.razorpaySignature,
+    config.razorpayKeySecret
+  );
+
+  updateOrderVerification_(row.rowNumber, {
+    razorpayPaymentId: payload.razorpayPaymentId,
+    razorpaySignature: payload.razorpaySignature,
+    paymentStatus: verified ? 'Paid' : 'Verification Failed',
+    verificationStatus: verified ? 'Verified' : 'Failed'
+  });
+
+  if (verified) {
+    sendConfirmationEmail_({
+      orderId: payload.orderId,
+      platform: row.platform,
+      qty: row.quantity,
+      unit: row.notes,
+      duration: row.duration,
+      amount: row.amount,
+      email: row.email,
+      phone: row.phone,
+      link: row.link,
+      razorpayPaymentId: payload.razorpayPaymentId
+    }, config);
+  }
+
+  return {
+    success: true,
+    verified: verified,
+    orderId: payload.orderId
+  };
+}
+
+function createRazorpayOrder_(config, payload) {
+  const response = UrlFetchApp.fetch('https://api.razorpay.com/v1/orders', {
+    method: 'post',
+    contentType: 'application/json',
+    headers: {
+      Authorization: 'Basic ' + Utilities.base64Encode(config.razorpayKeyId + ':' + config.razorpayKeySecret)
+    },
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true
+  });
+
+  const code = response.getResponseCode();
+  const body = JSON.parse(response.getContentText());
+
+  if (code < 200 || code >= 300) {
+    throw new Error(body.error && body.error.description ? body.error.description : 'Razorpay order creation failed.');
+  }
+
+  return body;
+}
+
+function verifySignature_(razorpayOrderId, paymentId, signature, secret) {
+  const signedPayload = razorpayOrderId + '|' + paymentId;
+  const raw = Utilities.computeHmacSha256Signature(signedPayload, secret);
+  const generatedSignature = raw.map(function (byte) {
+    const value = byte < 0 ? byte + 256 : byte;
+    return ('0' + value.toString(16)).slice(-2);
+  }).join('');
+
+  return generatedSignature === signature;
+}
+
+function upsertOrderRow_(data) {
+  const sheet = getOrdersSheet_();
+  const existing = findOrderRow_(data.orderId);
+
+  if (existing) {
+    sheet.getRange(existing.rowNumber, 1, 1, 16).setValues([[
+      data.orderId,
+      data.razorpayOrderId,
+      data.razorpayPaymentId,
+      data.razorpaySignature,
+      data.timestamp,
+      data.platform,
+      data.service,
+      data.quantity,
+      data.duration,
+      data.amount,
+      data.email,
+      data.phone,
+      data.link,
+      data.paymentStatus,
+      data.verificationStatus,
+      data.campaignStatus
+    ]]);
+    sheet.getRange(existing.rowNumber, 17).setValue(data.notes || '');
+    return existing.rowNumber;
+  }
+
+  sheet.appendRow([
+    data.orderId,
+    data.razorpayOrderId,
+    data.razorpayPaymentId,
+    data.razorpaySignature,
+    data.timestamp,
+    data.platform,
+    data.service,
+    data.quantity,
+    data.duration,
+    data.amount,
+    data.email,
+    data.phone,
+    data.link,
+    data.paymentStatus,
+    data.verificationStatus,
+    data.campaignStatus,
+    data.notes || ''
+  ]);
+
+  return sheet.getLastRow();
+}
+
+function updateOrderVerification_(rowNumber, values) {
+  const sheet = getOrdersSheet_();
+  sheet.getRange(rowNumber, 3).setValue(values.razorpayPaymentId || '');
+  sheet.getRange(rowNumber, 4).setValue(values.razorpaySignature || '');
+  sheet.getRange(rowNumber, 14).setValue(values.paymentStatus || '');
+  sheet.getRange(rowNumber, 15).setValue(values.verificationStatus || '');
+}
+
+function findOrderRow_(publicOrderId) {
+  const sheet = getOrdersSheet_();
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return null;
+
+  const values = sheet.getRange(2, 1, lastRow - 1, 17).getValues();
+  for (let i = 0; i < values.length; i++) {
+    if (values[i][0] !== publicOrderId) continue;
+
+    return {
+      rowNumber: i + 2,
+      orderId: values[i][0],
+      razorpayOrderId: values[i][1],
+      razorpayPaymentId: values[i][2],
+      razorpaySignature: values[i][3],
+      timestamp: values[i][4],
+      platform: values[i][5],
+      service: values[i][6],
+      quantity: values[i][7],
+      duration: values[i][8],
+      amount: values[i][9],
+      email: values[i][10],
+      phone: values[i][11],
+      link: values[i][12],
+      paymentStatus: values[i][13],
+      verificationStatus: values[i][14],
+      campaignStatus: values[i][15],
+      notes: values[i][16]
+    };
+  }
+
   return null;
 }
 
-// =============================================
-// GOOGLE SHEET SETUP (pehli baar run karo)
-// =============================================
-function setupSheets() {
-  const ss = SpreadsheetApp.openById(SHEET_ID);
-
-  // ---- Sheet 1: Orders ----
-  let orders = ss.getSheetByName('Orders');
-  if (!orders) orders = ss.insertSheet('Orders');
-  else orders.clear();
-
-  const orderHeaders = [
-    'Order ID',       // A
-    'Date & Time',    // B
-    'Platform',       // C
-    'Service',        // D
-    'Quantity',       // E
-    'Duration',       // F
-    'Amount (₹)',     // G
-    'Payment ID',     // H
-    'Email',          // I
-    'Phone',          // J
-    'Link',           // K
-    'Views Before',   // L
-    'Views After',    // M
-    'Views Gained',   // N
-    'Campaign Status',// O
-    'Notes'           // P
-  ];
-  orders.appendRow(orderHeaders);
-
-  // Header styling
-  const hRange = orders.getRange(1, 1, 1, orderHeaders.length);
-  hRange.setFontWeight('bold')
-        .setBackground('#7c3aed')
-        .setFontColor('#ffffff')
-        .setHorizontalAlignment('center');
-
-  // Column widths
-  orders.setColumnWidth(1, 150);  // Order ID
-  orders.setColumnWidth(2, 140);  // Date & Time
-  orders.setColumnWidth(3, 100);  // Platform
-  orders.setColumnWidth(4, 130);  // Service
-  orders.setColumnWidth(5, 120);  // Quantity
-  orders.setColumnWidth(6, 100);  // Duration
-  orders.setColumnWidth(7, 90);   // Amount
-  orders.setColumnWidth(8, 180);  // Payment ID
-  orders.setColumnWidth(9, 170);  // Email
-  orders.setColumnWidth(10, 130); // Phone
-  orders.setColumnWidth(11, 280); // Link
-  orders.setColumnWidth(12, 110); // Views Before
-  orders.setColumnWidth(13, 100); // Views After
-  orders.setColumnWidth(14, 110); // Views Gained
-  orders.setColumnWidth(15, 130); // Campaign Status
-  orders.setColumnWidth(16, 200); // Notes
-
-  orders.setFrozenRows(1);
-
-  // ---- Sheet 2: Dashboard ----
-  let dash = ss.getSheetByName('Dashboard');
-  if (!dash) dash = ss.insertSheet('Dashboard');
-  else dash.clear();
-
-  const dashData = [
-    ['📊 BoostKaro Dashboard', ''],
-    ['', ''],
-    ['💰 Revenue', ''],
-    ['Total Revenue (₹)',      "=SUM(Orders!G2:G)"],
-    ['Avg Order Value (₹)',    "=IFERROR(AVERAGE(Orders!G2:G),0)"],
-    ['', ''],
-    ['📦 Orders', ''],
-    ['Total Orders',           "=COUNTA(Orders!A2:A)"],
-    ['Not Started',            "=COUNTIF(Orders!O2:O,\"Not Started\")"],
-    ['Running',                "=COUNTIF(Orders!O2:O,\"Running\")"],
-    ['Completed',              "=COUNTIF(Orders!O2:O,\"Completed\")"],
-    ['', ''],
-    ['📱 Platform Wise', ''],
-    ['YouTube Orders',         "=COUNTIF(Orders!C2:C,\"youtube\")"],
-    ['Instagram Orders',       "=COUNTIF(Orders!C2:C,\"instagram\")"],
-    ['Facebook Orders',        "=COUNTIF(Orders!C2:C,\"facebook\")"],
-    ['', ''],
-    ['📈 YouTube Revenue (₹)', "=SUMIF(Orders!C2:C,\"youtube\",Orders!G2:G)"],
-    ['📈 Instagram Revenue (₹)',"=SUMIF(Orders!C2:C,\"instagram\",Orders!G2:G)"],
-    ['📈 Facebook Revenue (₹)', "=SUMIF(Orders!C2:C,\"facebook\",Orders!G2:G)"],
-  ];
-
-  dash.getRange(1, 1, dashData.length, 2).setValues(dashData);
-
-  // Dashboard styling
-  dash.getRange('A1').setFontSize(16).setFontWeight('bold').setFontColor('#7c3aed');
-  ['A3','A7','A13'].forEach(cell => {
-    dash.getRange(cell).setFontWeight('bold').setFontColor('#374151').setBackground('#f1f5f9');
-  });
-  dash.setColumnWidth(1, 200);
-  dash.setColumnWidth(2, 150);
-
-  Logger.log('✅ Sheets setup complete!');
-}
-
-// =============================================
-// GOOGLE SHEET MEIN ORDER RECORD KARO
-// =============================================
-function recordOrder(data) {
-  const ss    = SpreadsheetApp.openById(SHEET_ID);
-  const sheet = ss.getSheetByName('Orders');
+function getOrdersSheet_() {
+  const config = getConfig_();
+  const spreadsheet = SpreadsheetApp.openById(config.sheetId);
+  let sheet = spreadsheet.getSheetByName(DEFAULT_SHEET_NAME);
 
   if (!sheet) {
-    setupSheets(); // pehli baar auto setup
+    sheet = spreadsheet.insertSheet(DEFAULT_SHEET_NAME);
   }
 
-  const activeSheet = ss.getSheetByName('Orders');
-  activeSheet.appendRow([
-    data.orderId              || '',
-    new Date(data.timestamp)  || new Date(),
-    data.platform             || '',
-    data.objective            || '',
-    data.qty                  || '',
-    data.duration             || '',
-    data.amount               || '',
-    data.razorpayPaymentId    || '',
-    data.email                || '',
-    data.phone                || '',
-    data.link                 || '',
-    data.viewsBefore          || '',
-    '',                            // Views After
-    '',                            // Views Gained
-    'Not Started',                 // Campaign Status
-    ''                             // Notes
-  ]);
+  ensureHeaders_(sheet);
+  return sheet;
 }
 
-// =============================================
-// CAMPAIGN END — Views After update karo
-// Admin Google Sheet se Order ID copy karke
-// yahan paste kare aur ye function chalaye
-// =============================================
-function updateViewsAfter(orderId) {
-  const ss    = SpreadsheetApp.openById(SHEET_ID);
-  const sheet = ss.getSheetByName(SHEET_NAME);
-  const data  = sheet.getDataRange().getValues();
+function ensureHeaders_(sheet) {
+  const headers = [[
+    'Order ID',
+    'Razorpay Order ID',
+    'Razorpay Payment ID',
+    'Razorpay Signature',
+    'Created At',
+    'Platform',
+    'Service',
+    'Quantity',
+    'Duration',
+    'Amount',
+    'Email',
+    'Phone',
+    'Link',
+    'Payment Status',
+    'Verification Status',
+    'Campaign Status',
+    'Notes'
+  ]];
 
-  for (let i = 1; i < data.length; i++) {
-    if (data[i][0] !== orderId) continue;
-
-    const platform    = data[i][2];
-    const link        = data[i][11];
-    const viewsBefore = data[i][12];
-    let   viewsAfter  = '';
-
-    if (platform === 'youtube') {
-      viewsAfter = getYouTubeViews(link);
-    } else {
-      // Instagram/Facebook — admin manually enter karega
-      // Yahan se directly sheet update karo
-      Logger.log('Instagram/Facebook: Please manually enter Views After in the sheet.');
-      return;
-    }
-
-    const viewsGained = (typeof viewsBefore === 'number' && typeof viewsAfter === 'number')
-      ? viewsAfter - viewsBefore
-      : 'N/A';
-
-    const rowNum = i + 1;
-    sheet.getRange(rowNum, 14).setValue(viewsAfter);   // Views After
-    sheet.getRange(rowNum, 15).setValue(viewsGained);  // Views Gained
-    sheet.getRange(rowNum, 16).setValue('Completed');  // Campaign Status
-
-    // Completion email bhejo
-    sendCompletionEmail(data[i], viewsBefore, viewsAfter, viewsGained);
-
-    Logger.log(`Updated Order ${orderId}: Before=${viewsBefore}, After=${viewsAfter}, Gained=${viewsGained}`);
+  if (sheet.getLastRow() === 0) {
+    sheet.getRange(1, 1, 1, headers[0].length).setValues(headers);
+    sheet.setFrozenRows(1);
     return;
   }
 
-  Logger.log('Order not found: ' + orderId);
+  const currentHeaders = sheet.getRange(1, 1, 1, headers[0].length).getValues()[0];
+  const mismatch = headers[0].some(function (header, index) {
+    return currentHeaders[index] !== header;
+  });
+
+  if (mismatch) {
+    sheet.getRange(1, 1, 1, headers[0].length).setValues(headers);
+  }
 }
 
-// =============================================
-// CONFIRMATION EMAIL (Order ke baad)
-// =============================================
-function sendConfirmationEmail(data) {
+function sendConfirmationEmail_(data, config) {
   if (!data.email) return;
 
-  const platformNames = { youtube: 'YouTube', instagram: 'Instagram', facebook: 'Facebook' };
-  const platform = platformNames[data.platform] || data.platform;
-  const amount   = '₹' + Number(data.amount).toLocaleString('en-IN');
+  const subject = 'Order Confirmed - ' + data.orderId;
+  const amount = 'Rs ' + Number(data.amount || 0).toLocaleString('en-IN');
+  const htmlBody = [
+    '<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;">',
+    '<div style="background:linear-gradient(135deg,#7c3aed,#4f46e5);padding:24px 28px;border-radius:14px 14px 0 0;color:#fff;">',
+    '<h1 style="margin:0;font-size:28px;">' + escapeHtml_(config.businessName) + '</h1>',
+    '<p style="margin:8px 0 0;opacity:0.9;">Your payment has been verified successfully.</p>',
+    '</div>',
+    '<div style="border:1px solid #e2e8f0;border-top:none;padding:24px 28px;border-radius:0 0 14px 14px;background:#fff;">',
+    '<p style="margin-top:0;color:#334155;">We have received your order and will start processing it within 24 hours.</p>',
+    '<table style="width:100%;border-collapse:collapse;">',
+    buildEmailRow_('Order ID', data.orderId),
+    buildEmailRow_('Platform', data.platform),
+    buildEmailRow_('Service', (data.qty || '') + ' ' + (data.unit || '')),
+    buildEmailRow_('Duration', data.duration || ''),
+    buildEmailRow_('Amount', amount),
+    buildEmailRow_('Payment ID', data.razorpayPaymentId || ''),
+    '</table>',
+    '<p style="color:#64748b;font-size:14px;margin-bottom:0;">Website: <a href="' + escapeHtml_(config.siteUrl) + '">' + escapeHtml_(config.siteUrl) + '</a></p>',
+    '</div>',
+    '</div>'
+  ].join('');
 
-  const viewsBeforeRow = (data.platform === 'youtube' && typeof data.viewsBefore === 'number')
-    ? `<tr style="background:#fff; border-bottom:1px solid #e2e8f0;">
-        <td style="padding:10px 14px; color:#6b7280;">Views Before Campaign</td>
-        <td style="padding:10px 14px; color:#111827; font-weight:600;">${data.viewsBefore.toLocaleString('en-IN')}</td>
-       </tr>`
-    : '';
-
-  const subject  = `✅ Order Confirmed — ${data.orderId}`;
-  const htmlBody = `
-    <div style="font-family:Arial,sans-serif; max-width:560px; margin:0 auto;">
-      <div style="background:linear-gradient(135deg,#7c3aed,#4f46e5); padding:28px 32px; border-radius:12px 12px 0 0; text-align:center;">
-        <h1 style="color:#fff; margin:0; font-size:1.6rem;">⚡ BoostKaro</h1>
-        <p style="color:rgba(255,255,255,0.85); margin:6px 0 0;">Order Confirm Ho Gaya!</p>
-      </div>
-      <div style="background:#f9fafb; border:1px solid #e2e8f0; padding:28px 32px;">
-        <p style="color:#374151;">Namaste! 🙏 Aapka order receive ho gaya. Details neeche hain:</p>
-        <table style="width:100%; border-collapse:collapse; margin:20px 0; font-size:0.9rem;">
-          <tr style="background:#fff; border-bottom:1px solid #e2e8f0;">
-            <td style="padding:10px 14px; color:#6b7280; width:45%;">Order ID</td>
-            <td style="padding:10px 14px; color:#111827; font-weight:600;">${data.orderId}</td>
-          </tr>
-          <tr style="background:#f9fafb; border-bottom:1px solid #e2e8f0;">
-            <td style="padding:10px 14px; color:#6b7280;">Platform</td>
-            <td style="padding:10px 14px; color:#111827; font-weight:600;">${platform}</td>
-          </tr>
-          <tr style="background:#fff; border-bottom:1px solid #e2e8f0;">
-            <td style="padding:10px 14px; color:#6b7280;">Service</td>
-            <td style="padding:10px 14px; color:#111827; font-weight:600;">${data.qty} ${data.unit}</td>
-          </tr>
-          <tr style="background:#f9fafb; border-bottom:1px solid #e2e8f0;">
-            <td style="padding:10px 14px; color:#6b7280;">Duration</td>
-            <td style="padding:10px 14px; color:#111827; font-weight:600;">${data.duration}</td>
-          </tr>
-          ${viewsBeforeRow}
-          <tr style="background:#fff; border-bottom:1px solid #e2e8f0;">
-            <td style="padding:10px 14px; color:#6b7280;">Amount Paid</td>
-            <td style="padding:10px 14px; color:#059669; font-weight:700;">${amount}</td>
-          </tr>
-          <tr style="background:#f9fafb;">
-            <td style="padding:10px 14px; color:#6b7280;">Payment ID</td>
-            <td style="padding:10px 14px; color:#111827; font-size:0.82rem;">${data.razorpayPaymentId}</td>
-          </tr>
-        </table>
-        <div style="background:#ede9fe; border-left:4px solid #7c3aed; padding:14px 18px; border-radius:0 8px 8px 0; margin:20px 0;">
-          <p style="margin:0; color:#5b21b6; font-weight:600;">⏱ Campaign 24 ghante ke andar shuru hoga</p>
-          <p style="margin:6px 0 0; color:#7c3aed; font-size:0.88rem;">Start hone par aapko email notification milega.</p>
-        </div>
-        <p style="color:#6b7280; font-size:0.88rem;">Sawaal ho to: <a href="mailto:alokkmohan@zohomail.in" style="color:#7c3aed;">alokkmohan@zohomail.in</a></p>
-      </div>
-      <div style="background:#f1f5f9; padding:14px 32px; border-radius:0 0 12px 12px; text-align:center;">
-        <p style="color:#94a3b8; font-size:0.8rem; margin:0;">© 2026 ${BUSINESS_NAME}</p>
-      </div>
-    </div>`;
-
-  GmailApp.sendEmail(data.email, subject, '', { htmlBody });
+  GmailApp.sendEmail(data.email, subject, 'Order confirmed: ' + data.orderId, {
+    htmlBody: htmlBody
+  });
 }
 
-// =============================================
-// COMPLETION EMAIL (Campaign end par)
-// =============================================
-function sendCompletionEmail(orderRow, viewsBefore, viewsAfter, viewsGained) {
-  const email    = orderRow[9];
-  const orderId  = orderRow[0];
-  const platform = orderRow[2];
-  const qty      = orderRow[4];
-  const unit     = orderRow[5];
+function buildEmailRow_(label, value) {
+  return [
+    '<tr>',
+    '<td style="padding:10px 12px;border-bottom:1px solid #e2e8f0;color:#64748b;width:40%;">' + escapeHtml_(label) + '</td>',
+    '<td style="padding:10px 12px;border-bottom:1px solid #e2e8f0;color:#0f172a;font-weight:700;">' + escapeHtml_(String(value || '-')) + '</td>',
+    '</tr>'
+  ].join('');
+}
 
-  if (!email) return;
+function parseJsonBody_(e) {
+  if (!e || !e.postData || !e.postData.contents) {
+    return {};
+  }
+  return JSON.parse(e.postData.contents);
+}
 
-  const platformNames = { youtube: 'YouTube', instagram: 'Instagram', facebook: 'Facebook' };
-  const platformName  = platformNames[platform] || platform;
+function validateOrderPayload_(payload) {
+  if (!payload) throw new Error('Missing request body.');
+  if (!payload.amount || Number(payload.amount) <= 0) throw new Error('Invalid amount.');
+  if (!payload.link) throw new Error('Missing link.');
+}
 
-  const gainedStr = typeof viewsGained === 'number'
-    ? `+${viewsGained.toLocaleString('en-IN')} ${unit}`
-    : viewsGained;
+function validateVerificationPayload_(payload) {
+  if (!payload || !payload.orderId) throw new Error('Missing order ID.');
+  if (!payload.razorpayPaymentId) throw new Error('Missing payment ID.');
+  if (!payload.razorpaySignature) throw new Error('Missing signature.');
+}
 
-  const subject  = `🎉 Campaign Complete — ${orderId}`;
-  const htmlBody = `
-    <div style="font-family:Arial,sans-serif; max-width:560px; margin:0 auto;">
-      <div style="background:linear-gradient(135deg,#059669,#047857); padding:28px 32px; border-radius:12px 12px 0 0; text-align:center;">
-        <h1 style="color:#fff; margin:0;">🎉 Campaign Complete!</h1>
-        <p style="color:rgba(255,255,255,0.85); margin:6px 0 0;">Aapki promotion successfully complete ho gayi</p>
-      </div>
-      <div style="background:#f9fafb; border:1px solid #e2e8f0; padding:28px 32px;">
-        <table style="width:100%; border-collapse:collapse; margin:20px 0; font-size:0.9rem;">
-          <tr style="background:#fff; border-bottom:1px solid #e2e8f0;">
-            <td style="padding:10px 14px; color:#6b7280; width:45%;">Order ID</td>
-            <td style="padding:10px 14px; color:#111827; font-weight:600;">${orderId}</td>
-          </tr>
-          <tr style="background:#f9fafb; border-bottom:1px solid #e2e8f0;">
-            <td style="padding:10px 14px; color:#6b7280;">Platform</td>
-            <td style="padding:10px 14px; color:#111827; font-weight:600;">${platformName}</td>
-          </tr>
-          <tr style="background:#fff; border-bottom:1px solid #e2e8f0;">
-            <td style="padding:10px 14px; color:#6b7280;">Views Before</td>
-            <td style="padding:10px 14px; color:#111827; font-weight:600;">${typeof viewsBefore === 'number' ? viewsBefore.toLocaleString('en-IN') : viewsBefore}</td>
-          </tr>
-          <tr style="background:#f9fafb; border-bottom:1px solid #e2e8f0;">
-            <td style="padding:10px 14px; color:#6b7280;">Views After</td>
-            <td style="padding:10px 14px; color:#111827; font-weight:600;">${typeof viewsAfter === 'number' ? viewsAfter.toLocaleString('en-IN') : viewsAfter}</td>
-          </tr>
-          <tr style="background:#fff;">
-            <td style="padding:10px 14px; color:#6b7280;">Views Gained</td>
-            <td style="padding:10px 14px; color:#059669; font-weight:700; font-size:1.1rem;">${gainedStr}</td>
-          </tr>
-        </table>
-        <p style="color:#374151;">Dobara promotion ke liye: <a href="${SITE_URL}" style="color:#7c3aed;">BoostKaro</a></p>
-        <p style="color:#6b7280; font-size:0.88rem;">📧 <a href="mailto:alokkmohan@zohomail.in" style="color:#7c3aed;">alokkmohan@zohomail.in</a></p>
-      </div>
-      <div style="background:#f1f5f9; padding:14px 32px; border-radius:0 0 12px 12px; text-align:center;">
-        <p style="color:#94a3b8; font-size:0.8rem; margin:0;">© 2026 ${BUSINESS_NAME}</p>
-      </div>
-    </div>`;
+function getConfig_() {
+  const props = PropertiesService.getScriptProperties();
+  const config = {
+    sheetId: props.getProperty('SHEET_ID') || '',
+    razorpayKeyId: props.getProperty('RAZORPAY_KEY_ID') || '',
+    razorpayKeySecret: props.getProperty('RAZORPAY_KEY_SECRET') || '',
+    businessName: props.getProperty('BUSINESS_NAME') || 'BoostKaro',
+    siteUrl: props.getProperty('SITE_URL') || 'https://boostkaro.dataimpact.in/'
+  };
 
-  GmailApp.sendEmail(email, subject, '', { htmlBody });
+  if (!config.sheetId) throw new Error('SHEET_ID is missing in Script Properties.');
+  if (!config.razorpayKeyId) throw new Error('RAZORPAY_KEY_ID is missing in Script Properties.');
+  if (!config.razorpayKeySecret) throw new Error('RAZORPAY_KEY_SECRET is missing in Script Properties.');
+
+  return config;
+}
+
+function jsonResponse_(payload) {
+  return ContentService
+    .createTextOutput(JSON.stringify(payload))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function escapeHtml_(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }

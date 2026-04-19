@@ -138,7 +138,7 @@
     <div class="section-title">
       <span class="chip" data-hi="Step 4" data-en="Step 4">Step 4</span>
       <h2 data-hi="Apni Details Do" data-en="Enter Your Details">Apni Details Do</h2>
-      <p data-hi="Link aur email enter karo" data-en="Enter your link and email">Link aur email enter karo</p>
+      <p data-hi="Link aur WhatsApp details enter karo" data-en="Enter your link and WhatsApp details">Link aur WhatsApp details enter karo</p>
     </div>
 
     <div class="details-form">
@@ -147,8 +147,16 @@
         <input type="url" id="userLink"
           data-hi-placeholder="https://www.instagram.com/yourprofile"
           data-en-placeholder="https://www.instagram.com/yourprofile"
-          placeholder="https://www.instagram.com/yourprofile" />
+          placeholder="https://www.instagram.com/yourprofile"
+          oninput="updateLinkPreview()" />
         <span class="hint" data-hi="Jis page/video pe promotion chahiye uska link do" data-en="Paste the link of the page/video you want to promote">Jis page/video pe promotion chahiye uska link do</span>
+        <div class="link-preview-card" id="linkPreviewCard" style="display:none;">
+          <div class="link-preview-header">
+            <strong id="linkPreviewTitle">Link Preview</strong>
+            <span id="linkPreviewBadge">Check</span>
+          </div>
+          <div class="link-preview-body" id="linkPreviewBody"></div>
+        </div>
       </div>
       <div class="form-group">
         <label data-hi="📱 Mobile Number" data-en="📱 Mobile Number">📱 Mobile Number <span class="whatsapp-tag">WhatsApp Preferred</span></label>
@@ -162,12 +170,12 @@
         <span class="hint" data-hi="WhatsApp pe order updates milenge" data-en="You will receive order updates on WhatsApp">WhatsApp pe order updates milenge</span>
       </div>
       <div class="form-group">
-        <label data-hi="📧 Email Address" data-en="📧 Email Address">📧 Email Address</label>
+        <label data-hi="📧 Email Address (Optional)" data-en="📧 Email Address (Optional)">📧 Email Address (Optional)</label>
         <input type="email" id="userEmail"
           data-hi-placeholder="aapka@email.com"
           data-en-placeholder="your@email.com"
           placeholder="aapka@email.com" />
-        <span class="hint" data-hi="Order confirmation aur updates yahan aayenge" data-en="Order confirmation and updates will be sent here">Order confirmation aur updates yahan aayenge</span>
+        <span class="hint" data-hi="Email dena optional hai. Order updates WhatsApp par bhi milenge" data-en="Email is optional. You will also receive order updates on WhatsApp">Email dena optional hai. Order updates WhatsApp par bhi milenge</span>
       </div>
       <button class="btn-proceed" onclick="proceedToPayment()">
         <span data-hi="Proceed to Payment →" data-en="Proceed to Payment →">Proceed to Payment →</span>

@@ -3,87 +3,233 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Order Confirmed — BoostKaro</title>
+  <title>Order Confirmed - BoostKaro</title>
   <link rel="stylesheet" href="css/style.css" />
   <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .success-shell {
+      width: 100%;
+      max-width: 560px;
+    }
+
     .success-card {
-      max-width: 480px;
-      margin: 60px auto;
-      background: #1a1a1a;
-      border: 1px solid #333;
-      border-radius: 12px;
-      padding: 40px 32px;
-      text-align: center;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 36px 28px;
+      box-shadow: 0 20px 60px rgba(15, 23, 42, 0.10);
     }
-    .checkmark {
-      font-size: 4rem;
-      margin-bottom: 16px;
+
+    .success-mark {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 2rem;
+      background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+      margin-bottom: 18px;
     }
+
     .success-card h1 {
-      font-size: 1.5rem;
-      color: #10b981;
-      margin-bottom: 8px;
+      font-size: 1.9rem;
+      line-height: 1.2;
+      margin-bottom: 10px;
+      color: #0f172a;
     }
-    .success-card p {
-      color: #888;
-      margin-bottom: 24px;
+
+    .lead {
+      color: #475569;
+      margin-bottom: 18px;
     }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      margin-bottom: 22px;
+    }
+
+    .status-pill.verified {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #86efac;
+    }
+
+    .status-pill.processing,
+    .status-pill.received {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fcd34d;
+    }
+
+    .detail-list {
+      display: grid;
+      gap: 10px;
+      margin: 18px 0 8px;
+    }
+
     .detail-row {
       display: flex;
       justify-content: space-between;
-      padding: 8px 0;
-      border-bottom: 1px solid #2a2a2a;
-      font-size: 0.9rem;
+      gap: 18px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      font-size: 0.95rem;
     }
-    .detail-row span:first-child { color: #888; }
-    .detail-row span:last-child  { font-weight: 600; }
-    .home-btn {
+
+    .detail-row span:first-child {
+      color: #64748b;
+    }
+
+    .detail-row span:last-child {
+      color: #0f172a;
+      font-weight: 700;
+      text-align: right;
+      word-break: break-word;
+    }
+
+    .note {
+      margin-top: 18px;
+      color: #475569;
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 24px;
+    }
+
+    .home-btn,
+    .contact-btn {
       display: inline-block;
-      margin-top: 28px;
-      background: #7c3aed;
-      color: #fff;
-      border-radius: 8px;
-      padding: 12px 28px;
       text-decoration: none;
+      border-radius: 12px;
+      padding: 12px 18px;
       font-weight: 700;
     }
-    .home-btn:hover { background: #6d28d9; }
+
+    .home-btn {
+      background: linear-gradient(135deg, #7c3aed, #4f46e5);
+      color: #ffffff;
+    }
+
+    .contact-btn {
+      background: #ffffff;
+      color: #7c3aed;
+      border: 1px solid #cbd5e1;
+    }
+
+    @media (max-width: 540px) {
+      .detail-row {
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .detail-row span:last-child {
+        text-align: left;
+      }
+    }
   </style>
 </head>
 <body>
-  <header>
-    <a href="index.html" class="logo">⚡ BoostKaro</a>
-  </header>
+  <div class="success-shell">
+    <a href="index.html" class="logo" style="display:inline-block;margin-bottom:18px;">BoostKaro</a>
 
-  <div class="success-card">
-    <div class="checkmark">✅</div>
-    <h1>Order Confirmed!</h1>
-    <p>Shukriya! Aapka order receive ho gaya. Confirmation email bheja ja raha hai.</p>
+    <div class="success-card">
+      <div class="success-mark">OK</div>
+      <h1>Payment received</h1>
+      <p class="lead">Your order has been captured. We will start processing it and send updates on email or WhatsApp.</p>
 
-    <div id="orderDetails"></div>
+      <div id="statusPill" class="status-pill received">Order received</div>
+      <div id="orderDetails" class="detail-list"></div>
 
-    <p style="margin-top:20px; font-size:0.85rem; color:#888;">
-      Campaign <strong style="color:#a78bfa">24 ghante</strong> ke andar shuru hoga.<br/>
-      Result email pe milega.
-    </p>
+      <p id="statusNote" class="note">
+        Campaign usually starts within 24 hours.
+      </p>
 
-    <a href="index.html" class="home-btn">← Home</a>
+      <div class="actions">
+        <a href="index.html" class="home-btn">Back to Home</a>
+        <a href="mailto:alokkmohan@zohomail.in" class="contact-btn">Contact Support</a>
+      </div>
+    </div>
   </div>
 
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const details = document.getElementById('orderDetails');
+    (function () {
+      const STORAGE_KEY = 'boostkaro_last_order';
+      const params = new URLSearchParams(window.location.search);
+      const details = document.getElementById('orderDetails');
+      const statusPill = document.getElementById('statusPill');
+      const statusNote = document.getElementById('statusNote');
 
-    const rows = [
-      ['Order ID',  params.get('orderId') || '—'],
-      ['Plan',      params.get('plan')    || '—'],
-      ['Amount',    '₹' + (parseInt(params.get('amount')) || 0).toLocaleString('en-IN')],
-      ['Email',     params.get('email')   || '—'],
-    ];
+      let stored = {};
+      try {
+        stored = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '{}');
+      } catch (error) {
+        stored = {};
+      }
 
-    details.innerHTML = rows.map(([k, v]) =>
-      `<div class="detail-row"><span>${k}</span><span>${v}</span></div>`
-    ).join('');
+      const data = {
+        orderId: params.get('orderId') || stored.orderId || '-',
+        plan: params.get('plan') || stored.plan || '-',
+        amount: params.get('amount') || stored.amount || '0',
+        email: params.get('email') || stored.email || '-',
+        phone: stored.phone || '-',
+        paymentId: params.get('paymentId') || stored.paymentId || '-',
+        status: params.get('status') || stored.status || 'received'
+      };
+
+      const statusMap = {
+        verified: {
+          text: 'Payment verified',
+          note: 'Payment signature was verified and your order is ready for processing.'
+        },
+        processing: {
+          text: 'Verification in progress',
+          note: 'Payment was successful. Backend verification or logging is still in progress.'
+        },
+        received: {
+          text: 'Order received',
+          note: 'Payment was successful. Your order details have been captured.'
+        }
+      };
+
+      const statusConfig = statusMap[data.status] || statusMap.received;
+      statusPill.className = 'status-pill ' + (statusMap[data.status] ? data.status : 'received');
+      statusPill.textContent = statusConfig.text;
+      statusNote.textContent = statusConfig.note + ' Campaign usually starts within 24 hours.';
+
+      const amount = Number(data.amount || 0);
+      const rows = [
+        ['Order ID', data.orderId],
+        ['Plan', data.plan],
+        ['Amount', 'Rs ' + amount.toLocaleString('en-IN')],
+        ['Payment ID', data.paymentId],
+        ['Email', data.email],
+        ['WhatsApp', data.phone]
+      ];
+
+      details.innerHTML = rows.map(function (row) {
+        return '<div class="detail-row"><span>' + row[0] + '</span><span>' + row[1] + '</span></div>';
+      }).join('');
+    })();
   </script>
 </body>
 </html>
