@@ -71,6 +71,7 @@ function createOrder_(payload) {
     quantity: payload.qty || '',
     duration: payload.duration || '',
     amount: Number(payload.amount) || 0,
+    name: payload.name || '',
     email: payload.email || '',
     phone: payload.phone || '',
     link: payload.link || '',
@@ -441,7 +442,7 @@ function ensureHeaders_(sheet) {
     // Money
     'Amount (₹)', 'Ad Budget (₹)', 'Profit (₹)', 'Razorpay Fee (₹)',
     // Customer
-    'Email', 'Phone', 'Video/Profile Link',
+    'Customer Name', 'Email', 'Phone', 'Video/Profile Link',
     // Pre-Campaign
     'Pre-Campaign Views', 'Pre-Campaign Followers',
     // Payment
@@ -478,7 +479,7 @@ function upsertOrderRow_(data) {
     data.timestamp,
     data.platform, data.service, data.quantity, data.duration,
     amount, adBudget, profit, razorpayFee,
-    data.email, data.phone, data.link,
+    data.name || '', data.email, data.phone, data.link,
     data.preViews || '', data.preFollowers || '',
     data.paymentStatus, data.verificationStatus,
     data.campaignStatus, data.campaignId || '', data.campaignStart || '', data.campaignEnd || '',

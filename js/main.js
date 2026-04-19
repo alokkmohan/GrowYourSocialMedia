@@ -167,10 +167,12 @@ function selectPlan(plan, cardEl) {
 }
 
 function proceedToPayment() {
+  const name = document.getElementById('userName').value.trim();
   const link = document.getElementById('userLink').value.trim();
   const phone = document.getElementById('userPhone').value.trim();
   const email = document.getElementById('userEmail').value.trim();
 
+  if (!name) return showError('Apna naam likhein.');
   if (!link) return showError('Please enter the URL.');
   if (!isValidUrl(link)) return showError('Please enter a valid URL (starting with https://).');
   if (!isExpectedLinkForSelection(link)) return showError('Please enter the correct reel/video link for the selected service.');
@@ -178,6 +180,7 @@ function proceedToPayment() {
   if (!/^\d{10}$/.test(phone)) return showError('Please enter a valid 10-digit mobile number.');
   if (email && !isValidEmail(email)) return showError('Please enter a valid email address.');
 
+  order.name = name;
   order.link = link;
   order.phone = '+91' + phone;
   order.email = email;
@@ -185,6 +188,7 @@ function proceedToPayment() {
   const p = order.plan;
   const platformNames = { youtube: 'YouTube', instagram: 'Instagram', facebook: 'Facebook' };
   const summaryRows = [
+    ['Naam', name],
     ['Platform', platformNames[order.platform]],
     ['Service', `${p.qty} ${p.unit}`],
     ['Duration', p.dur],
@@ -225,6 +229,7 @@ async function initiatePayment() {
         platform: order.platform,
         objective: order.objective,
         link: order.link,
+        name: order.name,
         phone: order.phone,
         email: order.email,
         qty: p.qty,
@@ -246,7 +251,7 @@ async function initiatePayment() {
       name: 'BoostKaro',
       description: `${p.qty} ${p.unit}`,
       order_id: razorpayOrderId,
-      prefill: { email: order.email || undefined, contact: order.phone },
+      prefill: { name: order.name || undefined, email: order.email || undefined, contact: order.phone },
       notes: {
         platform: order.platform,
         objective: order.objective,
@@ -299,6 +304,7 @@ async function onPaymentSuccess(response, orderId, expectedRazorpayOrderId) {
     platform: order.platform,
     objective: order.objective,
     link: order.link,
+    name: order.name,
     phone: order.phone,
     email: order.email,
     qty: p.qty,
