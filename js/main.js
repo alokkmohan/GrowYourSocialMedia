@@ -13,38 +13,38 @@ let paymentInFlight = false;
 const planData = {
   youtube: {
     shorts: [
-      { qty: '700-1,200', unit: 'Shorts Views', dur: '2-3 days', price: 100 },
-      { qty: '1,500-2,500', unit: 'Shorts Views', dur: '3-5 days', price: 200 },
-      { qty: '4,000-7,000', unit: 'Shorts Views', dur: '5-7 days', price: 500 },
-      { qty: '8,000-15,000', unit: 'Shorts Views', dur: '7-10 days', price: 999 },
+      { qty: '700-1,200', unit: 'Shorts Views', dur: '2-3 din', price: 199 },
+      { qty: '1,500-2,500', unit: 'Shorts Views', dur: '3-5 din', price: 399 },
+      { qty: '4,000-7,000', unit: 'Shorts Views', dur: '5-7 din', price: 799 },
+      { qty: '8,000-15,000', unit: 'Shorts Views', dur: '7-10 din', price: 1499 },
     ],
     longvideo: [
-      { qty: '300-500', unit: 'Video Views', dur: '2-3 days', price: 100 },
-      { qty: '600-1,000', unit: 'Video Views', dur: '3-5 days', price: 200 },
-      { qty: '1,500-3,000', unit: 'Video Views', dur: '5-7 days', price: 500 },
-      { qty: '3,000-6,000', unit: 'Video Views', dur: '7-10 days', price: 999 },
+      { qty: '300-500', unit: 'Video Views', dur: '2-3 din', price: 199 },
+      { qty: '600-1,000', unit: 'Video Views', dur: '3-5 din', price: 399 },
+      { qty: '1,500-3,000', unit: 'Video Views', dur: '5-7 din', price: 799 },
+      { qty: '3,000-6,000', unit: 'Video Views', dur: '7-10 din', price: 1499 },
     ],
   },
   instagram: {
     reels: [
-      { qty: '800-1,500', unit: 'Reels Views', dur: '2-3 days', price: 100 },
-      { qty: '1,800-3,000', unit: 'Reels Views', dur: '3-5 days', price: 200 },
-      { qty: '5,000-9,000', unit: 'Reels Views', dur: '5-7 days', price: 500 },
-      { qty: '10,000-18,000', unit: 'Reels Views', dur: '7-10 days', price: 999 },
+      { qty: '800-1,500', unit: 'Reels Views', dur: '2-3 din', price: 199 },
+      { qty: '1,800-3,000', unit: 'Reels Views', dur: '3-5 din', price: 399 },
+      { qty: '5,000-9,000', unit: 'Reels Views', dur: '5-7 din', price: 799 },
+      { qty: '10,000-18,000', unit: 'Reels Views', dur: '7-10 din', price: 1499 },
     ],
   },
   facebook: {
     reels: [
-      { qty: '1,000-1,800', unit: 'Reels Views', dur: '2-3 days', price: 100 },
-      { qty: '2,200-3,500', unit: 'Reels Views', dur: '3-5 days', price: 200 },
-      { qty: '6,000-10,000', unit: 'Reels Views', dur: '5-7 days', price: 500 },
-      { qty: '12,000-20,000', unit: 'Reels Views', dur: '7-10 days', price: 999 },
+      { qty: '1,000-1,800', unit: 'Reels Views', dur: '2-3 din', price: 199 },
+      { qty: '2,200-3,500', unit: 'Reels Views', dur: '3-5 din', price: 399 },
+      { qty: '6,000-10,000', unit: 'Reels Views', dur: '5-7 din', price: 799 },
+      { qty: '12,000-20,000', unit: 'Reels Views', dur: '7-10 din', price: 1499 },
     ],
     video: [
-      { qty: '400-800', unit: 'Video Views', dur: '2-3 days', price: 100 },
-      { qty: '900-1,600', unit: 'Video Views', dur: '3-5 days', price: 200 },
-      { qty: '2,500-4,500', unit: 'Video Views', dur: '5-7 days', price: 500 },
-      { qty: '5,000-9,000', unit: 'Video Views', dur: '7-10 days', price: 999 },
+      { qty: '400-800', unit: 'Video Views', dur: '2-3 din', price: 199 },
+      { qty: '900-1,600', unit: 'Video Views', dur: '3-5 din', price: 399 },
+      { qty: '2,500-4,500', unit: 'Video Views', dur: '5-7 din', price: 799 },
+      { qty: '5,000-9,000', unit: 'Video Views', dur: '7-10 din', price: 1499 },
     ],
   },
 };
