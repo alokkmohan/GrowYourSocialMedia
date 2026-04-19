@@ -116,6 +116,13 @@ function verifyPayment_(payload) {
   });
 
   if (verified) {
+    // Fetch pre-campaign views
+    const preViews = fetchPreCampaignViews_(row.link, row.platform);
+    if (preViews !== null) {
+      const sheet = getOrdersSheet_();
+      sheet.getRange(row.rowNumber, 17).setValue(preViews);
+    }
+
     sendConfirmationEmail_({
       orderId: payload.orderId,
       platform: row.platform,
@@ -123,11 +130,14 @@ function verifyPayment_(payload) {
       unit: row.notes,
       duration: row.duration,
       amount: row.amount,
+      adBudget: Math.round(Number(row.amount) * AD_BUDGET_RATIO),
       email: row.email,
       phone: row.phone,
       link: row.link,
+      preViews: preViews,
       razorpayPaymentId: payload.razorpayPaymentId
     }, config);
+    markNotificationSent_(row.rowNumber, 'email');
 
     // Auto-launch ad campaign
     try {
@@ -141,8 +151,7 @@ function verifyPayment_(payload) {
         amount: Number(row.amount),
         adBudget: adBudget
       }, config);
-
-      updateCampaignStatus_(row.rowNumber, 'Running', campaignResult.campaignId || '');
+      updateCampaignStatus_(row.rowNumber, 'Launched', campaignResult.campaignId || '');
     } catch (campaignErr) {
       updateCampaignStatus_(row.rowNumber, 'Campaign Error: ' + campaignErr.message, '');
     }
@@ -270,7 +279,7 @@ function createGoogleAdsCampaign_(data, config) {
     'developer-token': devToken,
     'Content-Type': 'application/json'
   };
-  const base = 'https://googleads.googleapis.com/v16/customers/' + customerId;
+  const base = 'https://googleads.googleapis.com/v18/customers/' + customerId;
 
   // 1. Campaign Budget
   const budgetRes = googleAdsPost_(base + '/campaignBudgets:mutate', {
@@ -424,10 +433,27 @@ function getOrdersSheet_() {
 
 function ensureHeaders_(sheet) {
   const headers = [[
+    // Order Info
     'Order ID', 'Razorpay Order ID', 'Razorpay Payment ID', 'Razorpay Signature',
-    'Created At', 'Platform', 'Service', 'Quantity', 'Duration', 'Amount',
-    'Email', 'Phone', 'Link', 'Payment Status', 'Verification Status',
-    'Campaign Status', 'Campaign ID', 'Notes'
+    'Created At',
+    // Campaign Details
+    'Platform', 'Service', 'Plan (Views)', 'Duration',
+    // Money
+    'Amount (₹)', 'Ad Budget (₹)', 'Profit (₹)', 'Razorpay Fee (₹)',
+    // Customer
+    'Email', 'Phone', 'Video/Profile Link',
+    // Pre-Campaign
+    'Pre-Campaign Views', 'Pre-Campaign Followers',
+    // Payment
+    'Payment Status', 'Verification Status',
+    // Campaign Execution
+    'Campaign Status', 'Campaign ID', 'Campaign Start', 'Campaign End',
+    // Post-Campaign Results
+    'Post-Campaign Views', 'Views Gained', 'Post-Campaign Followers', 'Followers Gained',
+    // Notifications
+    'Confirmation Email Sent', 'Final Report Sent', 'WhatsApp Notified',
+    // Admin
+    'Refund Status', 'Notes'
   ]];
   if (sheet.getLastRow() === 0) {
     sheet.getRange(1, 1, 1, headers[0].length).setValues(headers);
@@ -443,11 +469,22 @@ function ensureHeaders_(sheet) {
 function upsertOrderRow_(data) {
   const sheet = getOrdersSheet_();
   const existing = findOrderRow_(data.orderId);
+  const amount = Number(data.amount) || 0;
+  const adBudget = Math.round(amount * AD_BUDGET_RATIO);
+  const razorpayFee = Math.round(amount * 0.02);
+  const profit = amount - adBudget - razorpayFee;
   const row = [
     data.orderId, data.razorpayOrderId, data.razorpayPaymentId, data.razorpaySignature,
-    data.timestamp, data.platform, data.service, data.quantity, data.duration, data.amount,
-    data.email, data.phone, data.link, data.paymentStatus, data.verificationStatus,
-    data.campaignStatus, data.campaignId || '', data.notes || ''
+    data.timestamp,
+    data.platform, data.service, data.quantity, data.duration,
+    amount, adBudget, profit, razorpayFee,
+    data.email, data.phone, data.link,
+    data.preViews || '', data.preFollowers || '',
+    data.paymentStatus, data.verificationStatus,
+    data.campaignStatus, data.campaignId || '', data.campaignStart || '', data.campaignEnd || '',
+    data.postViews || '', data.viewsGained || '', data.postFollowers || '', data.followersGained || '',
+    data.confirmEmailSent || 'No', data.finalReportSent || 'No', data.whatsappNotified || 'No',
+    data.refundStatus || '', data.notes || ''
   ];
   if (existing) {
     sheet.getRange(existing.rowNumber, 1, 1, row.length).setValues([row]);
@@ -461,21 +498,43 @@ function updateOrderVerification_(rowNumber, values) {
   const sheet = getOrdersSheet_();
   sheet.getRange(rowNumber, 3).setValue(values.razorpayPaymentId || '');
   sheet.getRange(rowNumber, 4).setValue(values.razorpaySignature || '');
-  sheet.getRange(rowNumber, 14).setValue(values.paymentStatus || '');
-  sheet.getRange(rowNumber, 15).setValue(values.verificationStatus || '');
+  sheet.getRange(rowNumber, 19).setValue(values.paymentStatus || '');
+  sheet.getRange(rowNumber, 20).setValue(values.verificationStatus || '');
 }
 
 function updateCampaignStatus_(rowNumber, status, campaignId) {
   const sheet = getOrdersSheet_();
-  sheet.getRange(rowNumber, 16).setValue(status);
-  sheet.getRange(rowNumber, 17).setValue(campaignId || '');
+  const now = new Date().toISOString();
+  sheet.getRange(rowNumber, 21).setValue(status);
+  sheet.getRange(rowNumber, 22).setValue(campaignId || '');
+  if (status === 'Launched') sheet.getRange(rowNumber, 23).setValue(now);
+}
+
+function updatePostCampaignData_(rowNumber, postViews, postFollowers) {
+  const sheet = getOrdersSheet_();
+  const row = sheet.getRange(rowNumber, 1, 1, 33).getValues()[0];
+  const preViews = Number(row[16]) || 0;
+  const preFollowers = Number(row[17]) || 0;
+  sheet.getRange(rowNumber, 24).setValue(new Date().toISOString()); // Campaign End
+  sheet.getRange(rowNumber, 25).setValue(postViews);
+  sheet.getRange(rowNumber, 26).setValue(postViews - preViews);
+  sheet.getRange(rowNumber, 27).setValue(postFollowers);
+  sheet.getRange(rowNumber, 28).setValue(postFollowers - preFollowers);
+  sheet.getRange(rowNumber, 21).setValue('Completed');
+}
+
+function markNotificationSent_(rowNumber, type) {
+  const sheet = getOrdersSheet_();
+  if (type === 'email')     sheet.getRange(rowNumber, 29).setValue('Yes');
+  if (type === 'report')    sheet.getRange(rowNumber, 30).setValue('Yes');
+  if (type === 'whatsapp')  sheet.getRange(rowNumber, 31).setValue('Yes');
 }
 
 function findOrderRow_(publicOrderId) {
   const sheet = getOrdersSheet_();
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) return null;
-  const values = sheet.getRange(2, 1, lastRow - 1, 18).getValues();
+  const values = sheet.getRange(2, 1, lastRow - 1, 33).getValues();
   for (var i = 0; i < values.length; i++) {
     if (values[i][0] !== publicOrderId) continue;
     return {
@@ -484,19 +543,35 @@ function findOrderRow_(publicOrderId) {
       razorpayOrderId: values[i][1],
       razorpayPaymentId: values[i][2],
       razorpaySignature: values[i][3],
+      timestamp: values[i][4],
       platform: values[i][5],
       service: values[i][6],
       quantity: values[i][7],
       duration: values[i][8],
       amount: values[i][9],
-      email: values[i][10],
-      phone: values[i][11],
-      link: values[i][12],
-      paymentStatus: values[i][13],
-      verificationStatus: values[i][14],
-      campaignStatus: values[i][15],
-      campaignId: values[i][16],
-      notes: values[i][17]
+      adBudget: values[i][10],
+      profit: values[i][11],
+      razorpayFee: values[i][12],
+      email: values[i][13],
+      phone: values[i][14],
+      link: values[i][15],
+      preViews: values[i][16],
+      preFollowers: values[i][17],
+      paymentStatus: values[i][18],
+      verificationStatus: values[i][19],
+      campaignStatus: values[i][20],
+      campaignId: values[i][21],
+      campaignStart: values[i][22],
+      campaignEnd: values[i][23],
+      postViews: values[i][24],
+      viewsGained: values[i][25],
+      postFollowers: values[i][26],
+      followersGained: values[i][27],
+      confirmEmailSent: values[i][28],
+      finalReportSent: values[i][29],
+      whatsappNotified: values[i][30],
+      refundStatus: values[i][31],
+      notes: values[i][32]
     };
   }
   return null;
@@ -508,28 +583,61 @@ function findOrderRow_(publicOrderId) {
 
 function sendConfirmationEmail_(data, config) {
   if (!data.email) return;
-  const subject = 'Order Confirmed — ' + data.orderId;
+  const subject = '✅ Order Confirmed — BoostKaro #' + data.orderId;
   const amount = '₹' + Number(data.amount || 0).toLocaleString('en-IN');
+  const adBudget = '₹' + Number(data.adBudget || 0).toLocaleString('en-IN');
   const html = [
     '<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;">',
-    '<div style="background:linear-gradient(135deg,#f97316,#ec4899);padding:24px 28px;border-radius:14px 14px 0 0;color:#fff;">',
-    '<h1 style="margin:0;font-size:26px;">' + escapeHtml_(config.businessName) + '</h1>',
-    '<p style="margin:8px 0 0;opacity:0.9;">Payment successfully received!</p>',
+    '<div style="background:linear-gradient(135deg,#f97316,#ec4899);padding:28px;border-radius:14px 14px 0 0;color:#fff;text-align:center;">',
+    '<h1 style="margin:0;font-size:28px;">⚡ BoostKaro</h1>',
+    '<p style="margin:8px 0 0;font-size:16px;opacity:0.95;">🎉 Aapka Order Confirm Ho Gaya!</p>',
     '</div>',
-    '<div style="border:1px solid #ffe8d6;border-top:none;padding:24px 28px;border-radius:0 0 14px 14px;background:#fff;">',
-    '<p style="color:#7a4f2d;">Aapka order receive ho gaya. Campaign tatkal shuru ho raha hai.</p>',
+    '<div style="border:1px solid #ffe8d6;border-top:none;padding:28px;border-radius:0 0 14px 14px;background:#fff;">',
+    '<p style="color:#7a4f2d;font-size:15px;margin-bottom:20px;">Namaskar! Aapka campaign shuru ho raha hai. Neeche aapke order ki details hain:</p>',
     '<table style="width:100%;border-collapse:collapse;">',
     buildEmailRow_('Order ID', data.orderId),
-    buildEmailRow_('Platform', data.platform),
+    buildEmailRow_('Platform', data.platform ? data.platform.charAt(0).toUpperCase() + data.platform.slice(1) : ''),
     buildEmailRow_('Service', (data.qty || '') + ' ' + (data.unit || '')),
     buildEmailRow_('Duration', data.duration || ''),
-    buildEmailRow_('Amount', amount),
+    buildEmailRow_('Amount Paid', amount),
+    buildEmailRow_('Ad Budget', adBudget),
+    buildEmailRow_('Video/Profile Link', data.link || ''),
+    data.preViews ? buildEmailRow_('Current Views (Before)', String(data.preViews)) : '',
     buildEmailRow_('Payment ID', data.razorpayPaymentId || ''),
     '</table>',
-    '<p style="color:#a8784a;font-size:13px;margin-top:16px;">Koi sawaal ho to WhatsApp karo: +91 7054411333</p>',
+    '<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:16px;margin-top:20px;">',
+    '<p style="margin:0;color:#166534;font-weight:700;">🚀 Campaign tatkal live ho raha hai!</p>',
+    '<p style="margin:6px 0 0;color:#166534;font-size:13px;">Campaign khatam hone par aapko final report email aur WhatsApp par milegi.</p>',
+    '</div>',
+    '<p style="color:#a8784a;font-size:13px;margin-top:20px;">Koi sawaal ho to WhatsApp karo: <strong>+91 7054411333</strong></p>',
     '</div></div>'
   ].join('');
   GmailApp.sendEmail(data.email, subject, 'Order confirmed: ' + data.orderId, { htmlBody: html });
+}
+
+function sendFinalReportEmail_(data, config) {
+  if (!data.email) return;
+  const subject = '📊 Campaign Report — BoostKaro #' + data.orderId;
+  const html = [
+    '<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;">',
+    '<div style="background:linear-gradient(135deg,#f97316,#ec4899);padding:28px;border-radius:14px 14px 0 0;color:#fff;text-align:center;">',
+    '<h1 style="margin:0;font-size:28px;">⚡ BoostKaro</h1>',
+    '<p style="margin:8px 0 0;font-size:16px;opacity:0.95;">📊 Aapka Campaign Report</p>',
+    '</div>',
+    '<div style="border:1px solid #ffe8d6;border-top:none;padding:28px;border-radius:0 0 14px 14px;background:#fff;">',
+    '<table style="width:100%;border-collapse:collapse;">',
+    buildEmailRow_('Order ID', data.orderId),
+    buildEmailRow_('Platform', data.platform || ''),
+    buildEmailRow_('Views Before Campaign', String(data.preViews || 0)),
+    buildEmailRow_('Views After Campaign', String(data.postViews || 0)),
+    buildEmailRow_('Views Gained', '🎉 +' + String(data.viewsGained || 0)),
+    buildEmailRow_('Campaign Duration', data.duration || ''),
+    '</table>',
+    '<p style="color:#a8784a;font-size:13px;margin-top:20px;">Dobara order karne ke liye: <a href="https://boostkaro.dataimpact.in">boostkaro.dataimpact.in</a></p>',
+    '<p style="color:#a8784a;font-size:13px;">WhatsApp: <strong>+91 7054411333</strong></p>',
+    '</div></div>'
+  ].join('');
+  GmailApp.sendEmail(data.email, subject, 'Campaign report: ' + data.orderId, { htmlBody: html });
 }
 
 function buildEmailRow_(label, value) {
@@ -563,6 +671,32 @@ function getConfig_() {
   if (!config.razorpayKeyId)   throw new Error('RAZORPAY_KEY_ID missing.');
   if (!config.razorpayKeySecret) throw new Error('RAZORPAY_KEY_SECRET missing.');
   return config;
+}
+
+// ─────────────────────────────────────────────
+// PRE/POST CAMPAIGN VIEW FETCHING
+// ─────────────────────────────────────────────
+
+function fetchPreCampaignViews_(link, platform) {
+  try {
+    if (platform === 'youtube') {
+      const videoId = extractYouTubeVideoId_(link);
+      if (!videoId) return null;
+      const p = PropertiesService.getScriptProperties();
+      const apiKey = p.getProperty('YOUTUBE_API_KEY');
+      if (!apiKey) return null;
+      const url = 'https://www.googleapis.com/youtube/v3/videos?part=statistics&id=' + videoId + '&key=' + apiKey;
+      const res = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+      const data = JSON.parse(res.getContentText());
+      if (data.items && data.items.length > 0) {
+        return Number(data.items[0].statistics.viewCount) || 0;
+      }
+    }
+    // Instagram/Facebook: needs Meta Graph API — add later when META_ACCESS_TOKEN is set
+    return null;
+  } catch (e) {
+    return null;
+  }
 }
 
 // ─────────────────────────────────────────────
