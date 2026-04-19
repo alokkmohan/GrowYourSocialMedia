@@ -8,6 +8,60 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .link-confirm-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 14px;
+      padding: 12px 14px;
+      background: #f0fdf4;
+      border: 1.5px solid #86efac;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #166534;
+    }
+    .link-confirm-label input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #16a34a;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .btn-proceed:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    .whatsapp-help-btn {
+      display: block;
+      margin-top: 14px;
+      padding: 11px 16px;
+      background: #22c55e;
+      color: #fff;
+      border-radius: 10px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 0.95rem;
+      text-decoration: none;
+      transition: background 0.18s;
+    }
+    .whatsapp-help-btn:hover { background: #16a34a; }
+    .nav-whatsapp {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #22c55e;
+      color: #fff !important;
+      border-radius: 8px;
+      padding: 5px 12px;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+    .nav-whatsapp:hover { background: #16a34a; }
+  </style>
 </head>
 <body>
 
@@ -18,6 +72,7 @@
       <div class="nav-links">
         <a href="#how">Kaise Kaam Karta Hai?</a>
         <a href="#faq">FAQ</a>
+        <a href="https://wa.me/919XXXXXXXXX?text=Mujhe%20BoostKaro%20mein%20help%20chahiye" target="_blank" rel="noopener noreferrer" class="nav-whatsapp">💬 Help</a>
         <a href="#platforms" class="nav-cta">Shuru Karo →</a>
       </div>
     </div>
@@ -28,8 +83,8 @@
     <div class="hero-bg"></div>
     <div class="hero-content">
       <div class="hero-badge">🚀 10,000+ Successful Orders</div>
-      <h1>Apna <span class="gradient-text">Social Media</span><br/>Tezi Se Grow Karo</h1>
-      <p>No login. No account. Sirf platform choose karo, plan lo, payment karo — aur promotion tatkal shuru!</p>
+      <h1>Ghar Baithe Apni <span class="gradient-text">Reels Pe</span><br/>Views Badhao</h1>
+      <p>Bahut aasaan hai — sirf link paste karo, plan lo, UPI se payment karo — aur views tatkal shuru!</p>
       <div class="hero-stats">
         <div class="hstat"><strong>10K+</strong><span>Orders Done</span></div>
         <div class="hstat"><strong>4.9★</strong><span>Rating</span></div>
@@ -87,8 +142,8 @@
   <section class="section-block reveal-section" id="objectiveSection">
     <div class="section-title">
       <span class="chip">Step 2</span>
-      <h2>Kya Badhana Hai?</h2>
-      <p id="objSubtitle">Apna objective choose karo</p>
+      <h2>Kya Chahiye?</h2>
+      <p id="objSubtitle">Views chahiye ya Followers?</p>
     </div>
 
     <div class="obj-cards" id="objCards">
@@ -102,8 +157,8 @@
   <section class="section-block reveal-section" id="planSection">
     <div class="section-title">
       <span class="chip">Step 3</span>
-      <h2>Plan Choose Karo</h2>
-      <p id="planSubtitle">Kitne chahiye?</p>
+      <h2>Kitne Views Chahiye?</h2>
+      <p id="planSubtitle">Apna plan chuno</p>
     </div>
 
     <div class="plan-cards" id="planCards">
@@ -117,8 +172,8 @@
   <section class="section-block reveal-section" id="detailsSection">
     <div class="section-title">
       <span class="chip">Step 4</span>
-      <h2>Apni Details Do</h2>
-      <p>Link aur WhatsApp details enter karo</p>
+      <h2>Apna Reel Link Paste Karo</h2>
+      <p>Jis reel pe views chahiye uska link yahan lagao</p>
     </div>
 
     <div class="details-form">
@@ -134,6 +189,10 @@
             <span id="linkPreviewBadge">Check</span>
           </div>
           <div class="link-preview-body" id="linkPreviewBody"></div>
+          <label class="link-confirm-label" id="linkConfirmLabel" style="display:none;">
+            <input type="checkbox" id="linkConfirmCheck" onchange="onLinkConfirmChange()" />
+            <span>✅ Haan, ye meri hi reel/video ka link hai</span>
+          </label>
         </div>
       </div>
       <div class="form-group">
@@ -185,7 +244,10 @@
           <span>🏦 Razorpay</span>
           <span>↩️ Refund Policy</span>
         </div>
-        <p class="upi-note">UPI · Credit/Debit Card · Net Banking · Wallet — sab accept hota hai</p>
+        <p class="upi-note">UPI · Credit/Debit Card · Net Banking · Wallet — sab accept hota hai<br/>Jaise Amazon ya Flipkart pe karte ho — bilkul waisa hi safe hai</p>
+        <a class="whatsapp-help-btn" href="https://wa.me/919XXXXXXXXX?text=Mujhe%20BoostKaro%20mein%20help%20chahiye" target="_blank" rel="noopener noreferrer">
+          💬 WhatsApp pe help lo
+        </a>
       </div>
     </div>
   </section>

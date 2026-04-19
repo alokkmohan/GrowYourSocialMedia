@@ -107,7 +107,7 @@ function selectPlatform(platform, cardEl) {
   });
 
   const names = { youtube: 'YouTube', instagram: 'Instagram', facebook: 'Facebook' };
-  document.getElementById('objSubtitle').textContent = names[platform] + ' ke liye objective choose karo';
+  document.getElementById('objSubtitle').textContent = names[platform] + ' ke liye — views chahiye ya followers?';
 
   hideFrom('objectiveSection');
   reveal('objectiveSection');
@@ -138,7 +138,7 @@ function selectObjective(objective, cardEl) {
     container.appendChild(card);
   });
 
-  document.getElementById('planSubtitle').textContent = `Kitne ${plans[0].unit} chahiye?`;
+  document.getElementById('planSubtitle').textContent = `Apna budget dekho aur plan chuno`;
 
   hideFrom('planSection');
   reveal('planSection');
@@ -159,6 +159,7 @@ function selectPlan(plan, cardEl) {
   linkInput.placeholder = placeholder;
   linkInput.value = '';
   document.getElementById('userEmail').value = '';
+  setProceedEnabled(false);
   updateLinkPreview();
 
   hideFrom('detailsSection');
@@ -338,12 +339,17 @@ function updateLinkPreview() {
   const title = document.getElementById('linkPreviewTitle');
   const badge = document.getElementById('linkPreviewBadge');
   const body = document.getElementById('linkPreviewBody');
+  const confirmLabel = document.getElementById('linkConfirmLabel');
+  const confirmCheck = document.getElementById('linkConfirmCheck');
   const rawLink = document.getElementById('userLink')?.value.trim() || '';
 
   if (!card || !title || !badge || !body) return;
   if (!rawLink || !isValidUrl(rawLink) || !order.platform || !order.objective) {
     card.style.display = 'none';
     body.innerHTML = '';
+    if (confirmLabel) confirmLabel.style.display = 'none';
+    if (confirmCheck) confirmCheck.checked = false;
+    setProceedEnabled(false);
     return;
   }
 
@@ -352,6 +358,20 @@ function updateLinkPreview() {
   title.textContent = meta.title;
   badge.textContent = meta.badge;
   body.innerHTML = meta.html;
+
+  if (confirmLabel) confirmLabel.style.display = 'flex';
+  if (confirmCheck) confirmCheck.checked = false;
+  setProceedEnabled(false);
+}
+
+function onLinkConfirmChange() {
+  const confirmCheck = document.getElementById('linkConfirmCheck');
+  setProceedEnabled(confirmCheck && confirmCheck.checked);
+}
+
+function setProceedEnabled(enabled) {
+  const btn = document.querySelector('.btn-proceed');
+  if (btn) btn.disabled = !enabled;
 }
 
 function getPreviewMeta(link) {
