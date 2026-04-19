@@ -2,7 +2,7 @@
 // BoostKaro — Main JS
 // =============================================
 
-const RAZORPAY_KEY    = 'rzp_test_XXXXXXXXXXXXXXXXXX'; // ← Apna key yahan
+const RAZORPAY_KEY    = 'rzp_live_SfEnPdfoYwU0WJ';     // Live Key ID only; keep Key Secret on the server
 const GAS_WEBHOOK_URL = '';                             // ← Google Apps Script URL
 
 // ---- STATE ----
