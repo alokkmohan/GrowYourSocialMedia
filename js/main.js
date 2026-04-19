@@ -253,7 +253,17 @@ async function initiatePayment() {
         link: order.link,
         orderId: publicOrderId,
       },
-      theme: { color: '#7c3aed' },
+      theme: { color: '#f97316' },
+      config: {
+        display: {
+          blocks: {
+            upi: { name: '⚡ UPI se Pay Karo (Sabse Aasaan)', instruments: [{ method: 'upi' }] },
+            other: { name: 'Card / Net Banking / Wallet', instruments: [{ method: 'card' }, { method: 'netbanking' }, { method: 'wallet' }] },
+          },
+          sequence: ['block.upi', 'block.other'],
+          preferences: { show_default_blocks: false },
+        },
+      },
       handler: (response) => {
         paymentInFlight = false;
         onPaymentSuccess(response, publicOrderId, razorpayOrderId);
