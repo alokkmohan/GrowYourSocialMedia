@@ -194,7 +194,7 @@ function setFilter(f, btn) {
 }
 
 function renderOrders() {
-  const paid = allOrders.filter(o => o.paymentStatus === 'Paid');
+  const paid = allOrders.filter(o => o.orderId);
   let filtered = paid;
   if (currentFilter === 'pending') filtered = paid.filter(o => !['Launched','Completed'].includes(o.campaignStatus));
   if (currentFilter === 'launched') filtered = paid.filter(o => o.campaignStatus === 'Launched');
