@@ -1,234 +1,219 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Order Confirmed - BoostKaro</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <title>Order Confirm Ho Gaya — BoostKaro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
-    body {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #fff9f5; min-height: 100vh; padding: 24px 16px; }
 
-    .success-shell {
-      width: 100%;
-      max-width: 560px;
-    }
+    .logo { display: inline-block; font-size: 1.4rem; font-weight: 800; color: #f97316; text-decoration: none; margin-bottom: 20px; }
 
-    .success-card {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
+    .card {
+      background: #fff;
       border-radius: 20px;
-      padding: 36px 28px;
-      box-shadow: 0 20px 60px rgba(15, 23, 42, 0.10);
+      border: 1.5px solid #ffe8d6;
+      padding: 32px 24px;
+      max-width: 520px;
+      margin: 0 auto;
+      box-shadow: 0 8px 32px rgba(249,115,22,0.08);
     }
 
-    .success-mark {
-      width: 72px;
-      height: 72px;
+    .success-icon {
+      width: 72px; height: 72px;
       border-radius: 50%;
-      display: grid;
-      place-items: center;
-      font-size: 2rem;
-      background: linear-gradient(135deg, #dcfce7, #bbf7d0);
-      margin-bottom: 18px;
+      background: linear-gradient(135deg, #f97316, #ec4899);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; margin: 0 auto 16px;
     }
 
-    .success-card h1 {
-      font-size: 1.9rem;
-      line-height: 1.2;
-      margin-bottom: 10px;
-      color: #0f172a;
-    }
+    .card h1 { text-align: center; font-size: 1.6rem; color: #1a0a00; margin-bottom: 6px; }
+    .card .subtitle { text-align: center; color: #a8784a; font-size: 0.95rem; margin-bottom: 24px; }
 
-    .lead {
-      color: #475569;
-      margin-bottom: 18px;
+    /* Timeline */
+    .timeline { display: flex; flex-direction: column; gap: 0; margin: 24px 0; }
+    .tl-step { display: flex; gap: 14px; position: relative; }
+    .tl-left { display: flex; flex-direction: column; align-items: center; }
+    .tl-dot {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; flex-shrink: 0;
     }
-
-    .status-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      border-radius: 999px;
-      padding: 8px 14px;
-      font-size: 0.88rem;
-      font-weight: 700;
-      margin-bottom: 22px;
+    .tl-dot.done { background: #dcfce7; border: 2px solid #16a34a; }
+    .tl-dot.active { background: linear-gradient(135deg, #f97316, #ec4899); color: #fff; }
+    .tl-dot.pending { background: #f1f5f9; border: 2px solid #cbd5e1; }
+    .tl-line { width: 2px; flex: 1; min-height: 28px; background: #ffe8d6; margin: 3px 0; }
+    .tl-content { padding-bottom: 24px; }
+    .tl-content h4 { font-size: 0.95rem; font-weight: 700; color: #1a0a00; margin-bottom: 2px; }
+    .tl-content p { font-size: 0.85rem; color: #a8784a; line-height: 1.5; }
+    .tl-badge {
+      display: inline-block; margin-top: 4px;
+      padding: 3px 10px; border-radius: 999px;
+      font-size: 0.78rem; font-weight: 700;
     }
+    .tl-badge.done { background: #dcfce7; color: #166534; }
+    .tl-badge.active { background: #fef3c7; color: #92400e; }
+    .tl-badge.pending { background: #f1f5f9; color: #64748b; }
 
-    .status-pill.verified {
-      background: #dcfce7;
-      color: #166534;
-      border: 1px solid #86efac;
+    /* Order Details */
+    .order-box {
+      background: #fff9f5;
+      border: 1.5px solid #ffe8d6;
+      border-radius: 14px;
+      padding: 16px;
+      margin: 20px 0;
     }
+    .order-box h3 { font-size: 0.85rem; color: #a8784a; font-weight: 700; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .order-row { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid #ffe8d6; font-size: 0.9rem; }
+    .order-row:last-child { border-bottom: none; }
+    .order-row span:first-child { color: #a8784a; }
+    .order-row span:last-child { color: #1a0a00; font-weight: 700; text-align: right; word-break: break-all; }
 
-    .status-pill.processing,
-    .status-pill.received {
-      background: #fef3c7;
-      color: #92400e;
-      border: 1px solid #fcd34d;
-    }
-
-    .detail-list {
-      display: grid;
-      gap: 10px;
-      margin: 18px 0 8px;
-    }
-
-    .detail-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 18px;
-      padding: 12px 14px;
+    /* Info box */
+    .info-box {
+      background: #f0fdf4;
+      border: 1.5px solid #86efac;
       border-radius: 12px;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      font-size: 0.95rem;
-    }
-
-    .detail-row span:first-child {
-      color: #64748b;
-    }
-
-    .detail-row span:last-child {
-      color: #0f172a;
-      font-weight: 700;
-      text-align: right;
-      word-break: break-word;
-    }
-
-    .note {
-      margin-top: 18px;
-      color: #475569;
-      font-size: 0.92rem;
+      padding: 14px 16px;
+      margin: 16px 0;
+      font-size: 0.88rem;
+      color: #166534;
       line-height: 1.6;
     }
+    .info-box strong { display: block; margin-bottom: 4px; font-size: 0.95rem; }
 
-    .actions {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-top: 24px;
+    /* Buttons */
+    .btn-wa {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; padding: 14px;
+      background: #22c55e; color: #fff;
+      border-radius: 12px; text-decoration: none;
+      font-weight: 700; font-size: 1rem;
+      margin-top: 16px;
+    }
+    .btn-wa:hover { background: #16a34a; }
+    .btn-home {
+      display: flex; align-items: center; justify-content: center;
+      width: 100%; padding: 12px;
+      background: #fff9f5; color: #f97316;
+      border: 2px solid #f97316;
+      border-radius: 12px; text-decoration: none;
+      font-weight: 700; font-size: 0.95rem;
+      margin-top: 10px;
     }
 
-    .home-btn,
-    .contact-btn {
-      display: inline-block;
-      text-decoration: none;
-      border-radius: 12px;
-      padding: 12px 18px;
-      font-weight: 700;
-    }
-
-    .home-btn {
-      background: linear-gradient(135deg, #7c3aed, #4f46e5);
-      color: #ffffff;
-    }
-
-    .contact-btn {
-      background: #ffffff;
-      color: #7c3aed;
-      border: 1px solid #cbd5e1;
-    }
-
-    @media (max-width: 540px) {
-      .detail-row {
-        flex-direction: column;
-        gap: 6px;
-      }
-
-      .detail-row span:last-child {
-        text-align: left;
-      }
+    .screenshot-tip {
+      text-align: center;
+      font-size: 0.82rem;
+      color: #a8784a;
+      margin-top: 16px;
     }
   </style>
 </head>
 <body>
-  <div class="success-shell">
-    <a href="index.html" class="logo" style="display:inline-block;margin-bottom:18px;">BoostKaro</a>
+  <div style="max-width:520px;margin:0 auto;">
+    <a href="index.html" class="logo">⚡ BoostKaro</a>
 
-    <div class="success-card">
-      <div class="success-mark">OK</div>
-      <h1>Payment received</h1>
-      <p class="lead">Your order has been captured. We will start processing it and send updates on email or WhatsApp.</p>
+    <div class="card">
+      <div class="success-icon">🎉</div>
+      <h1>Payment Ho Gaya!</h1>
+      <p class="subtitle">Aapka order confirm ho gaya hai — neeche poori jankari dekho</p>
 
-      <div id="statusPill" class="status-pill received">Order received</div>
-      <div id="orderDetails" class="detail-list"></div>
+      <!-- Timeline -->
+      <div class="timeline">
+        <div class="tl-step">
+          <div class="tl-left">
+            <div class="tl-dot done">✅</div>
+            <div class="tl-line"></div>
+          </div>
+          <div class="tl-content">
+            <h4>Payment Confirm</h4>
+            <p>Aapka payment successfully receive ho gaya</p>
+            <span class="tl-badge done">Ho Gaya ✓</span>
+          </div>
+        </div>
 
-      <p id="statusNote" class="note">
-        Campaign usually starts within 24 hours.
-      </p>
+        <div class="tl-step">
+          <div class="tl-left">
+            <div class="tl-dot active">🚀</div>
+            <div class="tl-line"></div>
+          </div>
+          <div class="tl-content">
+            <h4>Campaign Shuru Ho Raha Hai</h4>
+            <p>Aapka ad campaign jald hi live hoga. Confirmation email aur WhatsApp par message milega</p>
+            <span class="tl-badge active">Processing...</span>
+          </div>
+        </div>
 
-      <div class="actions">
-        <a href="index.html" class="home-btn">Back to Home</a>
-        <a href="mailto:alokkmohan@zohomail.in" class="contact-btn">Contact Support</a>
+        <div class="tl-step">
+          <div class="tl-left">
+            <div class="tl-dot pending">📊</div>
+          </div>
+          <div class="tl-content">
+            <h4>Final Report Milega</h4>
+            <p>Campaign khatam hone par views/results ki poori report email par aayegi</p>
+            <span class="tl-badge pending">Upcoming</span>
+          </div>
+        </div>
       </div>
+
+      <!-- Order Details -->
+      <div class="order-box">
+        <h3>Order Details</h3>
+        <div id="orderDetails"></div>
+      </div>
+
+      <!-- Info Box -->
+      <div class="info-box">
+        <strong>📧 Email + WhatsApp par updates milenge</strong>
+        Jab campaign live hoga — aapko email aur WhatsApp dono par notification aayega. Koi kaam karne ki zaroorat nahi!
+      </div>
+
+      <!-- WhatsApp Button -->
+      <a class="btn-wa" id="waBtn" href="https://wa.me/917054411333" target="_blank" rel="noopener noreferrer">
+        💬 WhatsApp pe Status Poochho
+      </a>
+
+      <a href="index.html" class="btn-home">🏠 Home Pe Wapas Jaao</a>
+
+      <p class="screenshot-tip">📸 Is page ka screenshot le lo — Order ID save karo</p>
     </div>
   </div>
 
   <script>
     (function () {
-      const STORAGE_KEY = 'boostkaro_last_order';
       const params = new URLSearchParams(window.location.search);
-      const details = document.getElementById('orderDetails');
-      const statusPill = document.getElementById('statusPill');
-      const statusNote = document.getElementById('statusNote');
-
       let stored = {};
-      try {
-        stored = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '{}');
-      } catch (error) {
-        stored = {};
-      }
+      try { stored = JSON.parse(sessionStorage.getItem('boostkaro_last_order') || '{}'); } catch (e) {}
 
-      const data = {
-        orderId: params.get('orderId') || stored.orderId || '-',
-        plan: params.get('plan') || stored.plan || '-',
-        amount: params.get('amount') || stored.amount || '0',
-        email: params.get('email') || stored.email || '-',
-        phone: stored.phone || '-',
-        paymentId: params.get('paymentId') || stored.paymentId || '-',
-        status: params.get('status') || stored.status || 'received'
-      };
+      const orderId   = params.get('orderId')   || stored.orderId   || '-';
+      const plan      = params.get('plan')       || stored.plan      || '-';
+      const amount    = params.get('amount')     || stored.amount    || '0';
+      const email     = params.get('email')      || stored.email     || '-';
+      const phone     = stored.phone || '-';
+      const paymentId = params.get('paymentId')  || stored.paymentId || '-';
+      const platform  = stored.platform || '';
 
-      const statusMap = {
-        verified: {
-          text: 'Payment verified',
-          note: 'Payment signature was verified and your order is ready for processing.'
-        },
-        processing: {
-          text: 'Verification in progress',
-          note: 'Payment was successful. Backend verification or logging is still in progress.'
-        },
-        received: {
-          text: 'Order received',
-          note: 'Payment was successful. Your order details have been captured.'
-        }
-      };
-
-      const statusConfig = statusMap[data.status] || statusMap.received;
-      statusPill.className = 'status-pill ' + (statusMap[data.status] ? data.status : 'received');
-      statusPill.textContent = statusConfig.text;
-      statusNote.textContent = statusConfig.note + ' Campaign usually starts within 24 hours.';
-
-      const amount = Number(data.amount || 0);
       const rows = [
-        ['Order ID', data.orderId],
-        ['Plan', data.plan],
-        ['Amount', 'Rs ' + amount.toLocaleString('en-IN')],
-        ['Payment ID', data.paymentId],
-        ['Email', data.email],
-        ['WhatsApp', data.phone]
+        ['Order ID', orderId],
+        ['Plan', plan],
+        ['Amount Paid', '₹' + Number(amount).toLocaleString('en-IN')],
+        ['Platform', platform ? platform.charAt(0).toUpperCase() + platform.slice(1) : '-'],
+        ['Payment ID', paymentId],
+        ['Email', email],
+        ['WhatsApp', phone],
       ];
 
-      details.innerHTML = rows.map(function (row) {
-        return '<div class="detail-row"><span>' + row[0] + '</span><span>' + row[1] + '</span></div>';
+      document.getElementById('orderDetails').innerHTML = rows.map(function(r) {
+        return '<div class="order-row"><span>' + r[0] + '</span><span>' + r[1] + '</span></div>';
       }).join('');
+
+      // WhatsApp message with order ID
+      const waMsg = encodeURIComponent('नमस्ते! मेरा Order ID है: ' + orderId + ' — कृपया campaign status बताएं।');
+      document.getElementById('waBtn').href = 'https://wa.me/917054411333?text=' + waMsg;
     })();
   </script>
 </body>

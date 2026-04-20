@@ -19,6 +19,62 @@ const DEFAULT_SHEET_NAME = 'Orders';
 const AD_BUDGET_RATIO = 0.80; // 80% of order goes to ads
 
 // ─────────────────────────────────────────────
+// SHEET EDIT TRIGGER — auto email on status change
+// In GAS: Triggers → Add Trigger → onSheetEdit → From spreadsheet → On edit
+// ─────────────────────────────────────────────
+
+function onSheetEdit(e) {
+  try {
+    if (!e || !e.range) return;
+    const sheet = e.range.getSheet();
+    if (sheet.getName() !== DEFAULT_SHEET_NAME) return;
+
+    const col = e.range.getColumn();
+    const row = e.range.getRow();
+    if (row < 2) return; // skip header
+
+    // Column 21 = Campaign Status
+    if (col !== 21) return;
+
+    const newStatus = String(e.value || '').trim();
+    const rowData = sheet.getRange(row, 1, 1, 34).getValues()[0];
+
+    const orderData = {
+      orderId:      rowData[0],
+      platform:     rowData[5],
+      service:      rowData[6],
+      quantity:     rowData[7],
+      duration:     rowData[8],
+      amount:       rowData[9],
+      adBudget:     rowData[10],
+      name:         rowData[13],
+      email:        rowData[14],
+      phone:        rowData[15],
+      link:         rowData[16],
+      preViews:     rowData[17],
+      campaignId:   rowData[22],
+      campaignStart:rowData[23],
+      postViews:    rowData[25],
+      viewsGained:  rowData[26],
+    };
+
+    const config = getConfig_();
+
+    if (newStatus === 'Launched') {
+      sendCampaignStartedEmail_(orderData, config);
+      markNotificationSent_(row, 'email');
+    }
+
+    if (newStatus === 'Completed') {
+      sendFinalReportEmail_(orderData, config);
+      markNotificationSent_(row, 'report');
+    }
+  } catch (err) {
+    Logger.log('onSheetEdit error: ' + err.message);
+  }
+}
+
+// ─────────────────────────────────────────────
 // ENTRY POINTS
 // ─────────────────────────────────────────────
 
@@ -614,6 +670,36 @@ function sendConfirmationEmail_(data, config) {
     '</div></div>'
   ].join('');
   GmailApp.sendEmail(data.email, subject, 'Order confirmed: ' + data.orderId, { htmlBody: html });
+}
+
+function sendCampaignStartedEmail_(data, config) {
+  if (!data.email) return;
+  const subject = '🚀 Aapka Campaign Live Ho Gaya! — BoostKaro #' + data.orderId;
+  const name = data.name ? data.name.split(' ')[0] : 'Aap';
+  const html = [
+    '<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;">',
+    '<div style="background:linear-gradient(135deg,#f97316,#ec4899);padding:28px;border-radius:14px 14px 0 0;color:#fff;text-align:center;">',
+    '<h1 style="margin:0;font-size:28px;">⚡ BoostKaro</h1>',
+    '<p style="margin:8px 0 0;font-size:16px;">🚀 Campaign Live Ho Gaya!</p>',
+    '</div>',
+    '<div style="border:1px solid #ffe8d6;border-top:none;padding:28px;border-radius:0 0 14px 14px;background:#fff;">',
+    '<p style="color:#7a4f2d;font-size:15px;">Namaskar <strong>' + escapeHtml_(name) + '</strong>!</p>',
+    '<p style="color:#7a4f2d;font-size:15px;margin-top:8px;">Aapka ad campaign abhi LIVE ho gaya hai. Views aane shuru ho jayenge!</p>',
+    '<table style="width:100%;border-collapse:collapse;margin-top:16px;">',
+    buildEmailRow_('Order ID', data.orderId),
+    buildEmailRow_('Platform', data.platform || ''),
+    buildEmailRow_('Views Before', String(data.preViews || 0)),
+    buildEmailRow_('Campaign ID', data.campaignId || 'Processing'),
+    buildEmailRow_('Video Link', data.link || ''),
+    '</table>',
+    '<div style="background:#fff9f5;border:1.5px solid #ffe8d6;border-radius:10px;padding:16px;margin-top:20px;">',
+    '<p style="margin:0;color:#f97316;font-weight:700;">📊 Aage Kya Hoga?</p>',
+    '<p style="margin:8px 0 0;color:#7a4f2d;font-size:13px;">Campaign khatam hone par aapko final report email par milegi — kitne views aaye, poori jankari ke saath.</p>',
+    '</div>',
+    '<p style="color:#a8784a;font-size:13px;margin-top:20px;">Koi sawaal? WhatsApp karo: <strong>+91 7054411333</strong></p>',
+    '</div></div>'
+  ].join('');
+  GmailApp.sendEmail(data.email, subject, 'Campaign live: ' + data.orderId, { htmlBody: html });
 }
 
 function sendFinalReportEmail_(data, config) {
