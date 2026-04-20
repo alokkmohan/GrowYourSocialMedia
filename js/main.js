@@ -536,38 +536,12 @@ function isValidEmail(str) {
 
 function isExpectedLinkForSelection(link) {
   try {
-    const url = new URL(link);
-    const host = url.hostname.toLowerCase();
-    const path = url.pathname.toLowerCase();
-
-    const isFB  = host.includes('facebook.com') || host.includes('fb.watch') || host.includes('fb.com');
-    const isIG  = host.includes('instagram.com');
-    const isYT  = host.includes('youtube.com') || host.includes('youtu.be');
-
-    // Wrong platform hostname → reject immediately
-    if (order.platform === 'facebook'  && !isFB)  return false;
-    if (order.platform === 'instagram' && !isIG)  return false;
-    if (order.platform === 'youtube'   && !isYT)  return false;
-
-    if (order.platform === 'facebook' && order.objective === 'reels') {
-      if (host.includes('fb.watch') || host.includes('fb.com')) return true;
-      return path.includes('/reel') || path.includes('/share/r/');
-    }
-    if (order.platform === 'facebook' && order.objective === 'video') {
-      if (host.includes('fb.watch') || host.includes('fb.com')) return true;
-      return path.includes('/video') || path.includes('/watch');
-    }
-    if (order.platform === 'instagram' && order.objective === 'reels') {
-      return path.includes('/reel');
-    }
-    if (order.platform === 'youtube' && order.objective === 'shorts') {
-      return path.includes('/shorts/') || host.includes('youtu.be');
-    }
-    if (order.platform === 'youtube' && order.objective === 'longvideo') {
-      return !!(url.searchParams.get('v') || host.includes('youtu.be') || path.includes('/watch'));
-    }
+    const host = new URL(link).hostname.toLowerCase();
+    if (order.platform === 'facebook')  return host.includes('facebook.com') || host.includes('fb.watch') || host.includes('fb.com');
+    if (order.platform === 'instagram') return host.includes('instagram.com');
+    if (order.platform === 'youtube')   return host.includes('youtube.com') || host.includes('youtu.be');
     return true;
-  } catch (error) {
+  } catch (e) {
     return false;
   }
 }
