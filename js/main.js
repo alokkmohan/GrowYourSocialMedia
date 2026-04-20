@@ -3,7 +3,7 @@
 // =============================================
 
 const RAZORPAY_KEY = 'rzp_live_SfEnPdfoYwU0WJ';
-const PAYMENT_API_URL = 'https://script.google.com/macros/s/AKfycbxoVenflAPT0bsgfxh8lP3Kn6Qu_IPy2djIGExk7HZvMnbFddxmuoGuHaLLvKU0Es85/exec';
+const PAYMENT_API_URL = 'https://script.google.com/macros/s/AKfycbwn6Os7sfzauNczABgOCx8ex1HaVDpAOSruS7a4ApUiBUdiSPJR4BNE1o_5Ih-TyttK/exec';
 const GAS_WEBHOOK_URL = '';
 
 const order = { platform: '', objective: '', plan: null, link: '', phone: '', email: '' };
@@ -504,8 +504,9 @@ async function createBackendOrder(payload) {
 async function postJson(url, payload) {
   const response = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'text/plain' },
     body: JSON.stringify(payload),
+    redirect: 'follow',
   });
 
   const text = await response.text();
