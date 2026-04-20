@@ -537,19 +537,34 @@ function isValidEmail(str) {
 function isExpectedLinkForSelection(link) {
   try {
     const url = new URL(link);
+    const host = url.hostname.toLowerCase();
     const path = url.pathname.toLowerCase();
 
-    if (order.platform === 'instagram' && order.objective === 'reels') {
-      return path.includes('/reel/');
-    }
+    const isFB  = host.includes('facebook.com') || host.includes('fb.watch') || host.includes('fb.com');
+    const isIG  = host.includes('instagram.com');
+    const isYT  = host.includes('youtube.com') || host.includes('youtu.be');
+
+    // Wrong platform hostname → reject immediately
+    if (order.platform === 'facebook'  && !isFB)  return false;
+    if (order.platform === 'instagram' && !isIG)  return false;
+    if (order.platform === 'youtube'   && !isYT)  return false;
+
     if (order.platform === 'facebook' && order.objective === 'reels') {
-      return path.includes('/reel/');
+      if (host.includes('fb.watch') || host.includes('fb.com')) return true;
+      return path.includes('/reel') || path.includes('/share/r/');
     }
     if (order.platform === 'facebook' && order.objective === 'video') {
-      return path.includes('/video/');
+      if (host.includes('fb.watch') || host.includes('fb.com')) return true;
+      return path.includes('/video') || path.includes('/watch');
+    }
+    if (order.platform === 'instagram' && order.objective === 'reels') {
+      return path.includes('/reel');
     }
     if (order.platform === 'youtube' && order.objective === 'shorts') {
-      return path.includes('/shorts/') || url.hostname.includes('youtu.be');
+      return path.includes('/shorts/') || host.includes('youtu.be');
+    }
+    if (order.platform === 'youtube' && order.objective === 'longvideo') {
+      return !!(url.searchParams.get('v') || host.includes('youtu.be') || path.includes('/watch'));
     }
     return true;
   } catch (error) {
