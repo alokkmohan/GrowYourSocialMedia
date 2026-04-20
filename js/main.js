@@ -2,7 +2,7 @@
 // BoostKaro - Main JS
 // =============================================
 
-const RAZORPAY_KEY = 'rzp_live_SfEnPdfoYwU0WJ';
+const RAZORPAY_KEY = 'rzp_test_SfhusOo0f9Pt37';
 const PAYMENT_API_URL = 'https://script.google.com/macros/s/AKfycbz9k4YSM0uh1ou0fiVlWuY6oGZn8Ikch3mBbHZqniane9cn95W1F6G7Kc6N359YtuaH/exec';
 const GAS_WEBHOOK_URL = '';
 
