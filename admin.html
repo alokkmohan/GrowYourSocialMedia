@@ -66,8 +66,15 @@
     .status-select.s-completed{border-color:#86efac;color:#166534;background:#f0fdf4}
 
     /* BUTTONS */
-    .btn-wa{display:inline-flex;align-items:center;gap:5px;padding:7px 12px;background:#22c55e;color:#fff;border:none;border-radius:8px;font-size:0.78rem;font-weight:700;cursor:pointer;text-decoration:none;font-family:inherit;transition:background 0.15s}
+    .btn-wa{display:inline-flex;align-items:center;gap:5px;padding:7px 11px;background:#22c55e;color:#fff;border:none;border-radius:8px;font-size:0.78rem;font-weight:700;cursor:pointer;text-decoration:none;font-family:inherit;transition:background 0.15s}
     .btn-wa:hover{background:#16a34a}
+    .btn-mail{display:inline-flex;align-items:center;gap:5px;padding:7px 11px;background:#6366f1;color:#fff;border:none;border-radius:8px;font-size:0.78rem;font-weight:700;cursor:pointer;text-decoration:none;font-family:inherit;transition:background 0.15s;margin-top:5px}
+    .btn-mail:hover{background:#4f46e5}
+    .action-col{display:flex;flex-direction:column;gap:0}
+    .video-link{display:inline-block;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#6366f1;font-size:0.78rem;font-weight:600;text-decoration:none;vertical-align:middle}
+    .video-link:hover{text-decoration:underline}
+    .no-link{color:#cbd5e1;font-size:0.78rem}
+    .service-tag{display:inline-block;background:#f1f5f9;color:#475569;padding:2px 7px;border-radius:5px;font-size:0.73rem;font-weight:600;margin-top:3px}
 
     /* EMPTY */
     .empty-state{text-align:center;padding:60px 24px;color:#94a3b8}
@@ -221,28 +228,42 @@ function renderTable() {
         <th>#</th>
         <th>Order ID</th>
         <th>Customer</th>
-        <th>WhatsApp</th>
         <th>Platform</th>
-        <th>Plan / Ad Budget</th>
+        <th>Video Link</th>
+        <th>Plan / Budget</th>
         <th>Status</th>
-        <th>Action</th>
+        <th>Actions</th>
       </tr>
     </thead>
     <tbody>
       ${rows.map((o,i) => {
         const phone = String(o.phone||'').replace(/\D/g,'');
         const waMsg = encodeURIComponent('Namaskar ' + (o.name||'') + '! Aapka BoostKaro Order #' + o.orderId + ' — campaign update ke liye message kar rahe hain. 🚀');
-        const waLink = 'https://wa.me/' + phone + '?text=' + waMsg;
+        const waLink = 'https://wa.me/' + (phone.startsWith('91') ? phone : '91'+phone) + '?text=' + waMsg;
         const sc = o.campaignStatus === 'Launched' ? 's-launched' : o.campaignStatus === 'Completed' ? 's-completed' : 's-pending';
+        const videoLink = o.userLink || o.link || '';
+        const linkDisplay = videoLink ? videoLink.replace(/https?:\/\/(www\.)?/,'').slice(0,30) + (videoLink.length > 35 ? '…' : '') : '';
+        const service = o.service || o.objective || '';
+        const mailSubject = encodeURIComponent('BoostKaro — Order #' + o.orderId + ' Update');
+        const mailBody = encodeURIComponent('Namaskar ' + (o.name||'') + ',\n\nAapka order update hai.\n\nOrder ID: ' + o.orderId + '\n\nBoostKaro Team');
+        const hasEmail = o.email && o.email !== '-' && o.email.includes('@');
         return `<tr>
           <td class="sr">${i+1}</td>
           <td><span class="order-id">${o.orderId}</span></td>
-          <td class="cust-name">${o.name || '—'}</td>
-          <td><span class="wa-num">${o.phone || '—'}</span></td>
+          <td>
+            <div class="cust-name">${o.name || '—'}</div>
+            <div style="font-size:0.75rem;color:#94a3b8;margin-top:2px">📱 ${o.phone || '—'}</div>
+          </td>
           <td><span class="platform-badge ${pMap[o.platform]||'p-yt'}">${pName[o.platform]||o.platform}</span></td>
           <td>
-            <div class="amount">₹${Number(o.adBudget||0).toLocaleString('en-IN')} <span style="font-size:0.7rem;color:#94a3b8">ad</span></div>
-            <div class="ad-budget">${o.plan||o.service||''} · Paid ₹${Number(o.amount||0).toLocaleString('en-IN')}</div>
+            ${videoLink
+              ? `<a href="${videoLink}" target="_blank" class="video-link" title="${videoLink}">🔗 ${linkDisplay}</a>`
+              : `<span class="no-link">—</span>`}
+            ${service ? `<div><span class="service-tag">${service}</span></div>` : ''}
+          </td>
+          <td>
+            <div class="amount">₹${Number(o.amount||0).toLocaleString('en-IN')} <span style="font-size:0.7rem;color:#94a3b8">paid</span></div>
+            <div class="ad-budget">Ad: ₹${Number(o.adBudget||0).toLocaleString('en-IN')} · ${o.plan||''}</div>
           </td>
           <td>
             <select class="status-select ${sc}" onchange="onStatusChange('${o.orderId}', this)">
@@ -252,7 +273,12 @@ function renderTable() {
               <option ${o.campaignStatus==='Campaign Error'?'selected':''}>Campaign Error</option>
             </select>
           </td>
-          <td><a href="${waLink}" target="_blank" class="btn-wa">📱 WhatsApp</a></td>
+          <td>
+            <div class="action-col">
+              <a href="${waLink}" target="_blank" class="btn-wa">📱 WhatsApp</a>
+              ${hasEmail ? `<a href="mailto:${o.email}?subject=${mailSubject}&body=${mailBody}" class="btn-mail">✉️ Mail</a>` : ''}
+            </div>
+          </td>
         </tr>`;
       }).join('')}
     </tbody>
