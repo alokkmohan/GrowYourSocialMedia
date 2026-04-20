@@ -75,6 +75,20 @@ const linkPlaceholders = {
   facebook: { reels: 'https://www.facebook.com/reel/...', video: 'https://www.facebook.com/video/...' },
 };
 
+const linkHints = {
+  youtube: {
+    shorts:    { text: 'Sirf YouTube Shorts ka link daalo — youtube.com/shorts/xxxxx. Facebook ya Instagram ka link yahan kaam nahi karega.', url: 'https://www.youtube.com/', btn: 'YouTube pe apna Short dhundho' },
+    longvideo: { text: 'Sirf YouTube Video ka link daalo — youtube.com/watch?v=xxxxx. Kisi aur platform ka link mat daalo.', url: 'https://www.youtube.com/', btn: 'YouTube pe apna Video dhundho' },
+  },
+  instagram: {
+    reels: { text: 'Sirf Instagram Reel ka link daalo — instagram.com/reel/xxxxx. YouTube ya Facebook ka link yahan kaam nahi karega.', url: 'https://www.instagram.com/', btn: 'Instagram pe apna Reel dhundho' },
+  },
+  facebook: {
+    reels: { text: 'Sirf Facebook Reel ka link daalo — facebook.com/reel/xxxxx. YouTube ya Instagram ka link yahan kaam nahi karega.', url: 'https://www.facebook.com/', btn: 'Facebook pe apna Reel dhundho' },
+    video: { text: 'Sirf Facebook Video ka link daalo — facebook.com/video/xxxxx. Kisi aur platform ka link mat daalo.', url: 'https://www.facebook.com/', btn: 'Facebook pe apna Video dhundho' },
+  },
+};
+
 function reveal(id) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -153,6 +167,7 @@ function selectPlan(plan, cardEl) {
 
   const label = linkLabels[order.platform][order.objective];
   const placeholder = linkPlaceholders[order.platform][order.objective];
+  const hint = linkHints[order.platform] && linkHints[order.platform][order.objective];
   const linkInput = document.getElementById('userLink');
 
   document.getElementById('linkLabel').textContent = '🔗 ' + label;
@@ -161,6 +176,17 @@ function selectPlan(plan, cardEl) {
   document.getElementById('userEmail').value = '';
   setProceedEnabled(false);
   updateLinkPreview();
+
+  // Show platform hint
+  const hintBox = document.getElementById('linkPlatformHint');
+  if (hint && hintBox) {
+    document.getElementById('linkHintText').textContent = ' ' + hint.text;
+    document.getElementById('linkGetBtn').href = hint.url;
+    document.getElementById('linkGetBtnText').textContent = hint.btn;
+    hintBox.style.display = 'block';
+  } else if (hintBox) {
+    hintBox.style.display = 'none';
+  }
 
   hideFrom('detailsSection');
   reveal('detailsSection');
@@ -175,7 +201,12 @@ function proceedToPayment() {
   if (!name) return showError('Apna naam likhein.');
   if (!link) return showError('Please enter the URL.');
   if (!isValidUrl(link)) return showError('Please enter a valid URL (starting with https://).');
-  if (!isExpectedLinkForSelection(link)) return showError('Please enter the correct reel/video link for the selected service.');
+  if (!isExpectedLinkForSelection(link)) {
+    const pNames = { youtube: 'YouTube', instagram: 'Instagram', facebook: 'Facebook' };
+    const pName = pNames[order.platform] || order.platform;
+    const hint = linkHints[order.platform] && linkHints[order.platform][order.objective];
+    return showError('❌ Galat link!\n\nAapne ' + pName + ' select kiya hai — sirf ' + pName + ' ka link daalo.\n\n' + (hint ? hint.text : 'Sahi platform ka link copy karke yahan paste karo.'));
+  }
   if (!phone) return showError('Please enter your mobile number.');
   if (!/^\d{10}$/.test(phone)) return showError('Please enter a valid 10-digit mobile number.');
   if (email && !isValidEmail(email)) return showError('Sahi email address likhein.');

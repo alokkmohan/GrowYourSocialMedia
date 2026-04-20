@@ -195,7 +195,16 @@
         <input type="url" id="userLink"
           placeholder="https://www.instagram.com/yourprofile"
           oninput="updateLinkPreview()" />
-        <span class="hint">Jis page/video pe promotion chahiye uska link do</span>
+        <div id="linkPlatformHint" style="display:none;margin-top:8px;background:#fff3e0;border:1.5px solid #f97316;border-radius:10px;padding:11px 14px;font-size:0.85rem;color:#92400e;line-height:1.6;">
+          <strong id="linkHintTitle">⚠️ Dhyan do:</strong>
+          <span id="linkHintText"></span>
+          <br/>
+          <a id="linkGetBtn" href="#" target="_blank" rel="noopener noreferrer"
+            style="display:inline-block;margin-top:7px;padding:7px 14px;background:#f97316;color:#fff;border-radius:8px;font-weight:700;font-size:0.82rem;text-decoration:none;">
+            👉 <span id="linkGetBtnText">Yahan se apna link lo</span> ↗
+          </a>
+        </div>
+        <span class="hint">Jis video pe promotion chahiye sirf usi platform ka link daalo</span>
         <div class="link-preview-card" id="linkPreviewCard" style="display:none;">
           <div class="link-preview-header">
             <strong id="linkPreviewTitle">Link Preview</strong>
