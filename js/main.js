@@ -263,7 +263,7 @@ async function initiatePayment() {
       config: {
         display: {
           blocks: {
-            upi: { name: '⚡ UPI se Pay Karo (Sabse Aasaan)', instruments: [{ method: 'upi' }] },
+            upi: { name: '⚡ UPI se Pay Karo (Sabse Aasaan)', instruments: [{ method: 'upi', flows: ['collect'] }] },
             other: { name: 'Card / Net Banking / Wallet', instruments: [{ method: 'card' }, { method: 'netbanking' }, { method: 'wallet' }] },
           },
           sequence: ['block.upi', 'block.other'],
