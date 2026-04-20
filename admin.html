@@ -68,6 +68,12 @@
     /* BUTTONS */
     .btn-wa{display:inline-flex;align-items:center;gap:5px;padding:7px 11px;background:#22c55e;color:#fff;border:none;border-radius:8px;font-size:0.78rem;font-weight:700;cursor:pointer;text-decoration:none;font-family:inherit;transition:background 0.15s}
     .btn-wa:hover{background:#16a34a}
+    .track-cell{display:flex;align-items:center;gap:5px}
+    .track-no{font-size:1rem;font-weight:800;color:#f97316;letter-spacing:0.08em;min-width:52px;cursor:pointer;border-bottom:1.5px dashed #fcd34d}
+    .track-no:hover{color:#ea580c}
+    .track-input-inline{width:70px;padding:4px 7px;border:1.5px solid #f97316;border-radius:6px;font-size:0.95rem;font-weight:700;font-family:inherit;color:#f97316;outline:none;text-align:center;letter-spacing:0.08em}
+    .btn-save-track{padding:4px 9px;background:#f97316;color:#fff;border:none;border-radius:6px;font-size:0.75rem;font-weight:700;cursor:pointer;font-family:inherit}
+    .btn-save-track:hover{background:#ea580c}
     .btn-mail{display:inline-flex;align-items:center;gap:5px;padding:7px 11px;background:#6366f1;color:#fff;border:none;border-radius:8px;font-size:0.78rem;font-weight:700;cursor:pointer;text-decoration:none;font-family:inherit;transition:background 0.15s;margin-top:5px}
     .btn-mail:hover{background:#4f46e5}
     .action-col{display:flex;flex-direction:column;gap:0}
@@ -225,7 +231,7 @@ function renderTable() {
   <table>
     <thead>
       <tr>
-        <th>#</th>
+        <th>Track #</th>
         <th>Order ID</th>
         <th>Customer</th>
         <th>Platform</th>
@@ -248,7 +254,11 @@ function renderTable() {
         const mailBody = encodeURIComponent('Namaskar ' + (o.name||'') + ',\n\nAapka order update hai.\n\nOrder ID: ' + o.orderId + '\n\nBoostKaro Team');
         const hasEmail = o.email && o.email !== '-' && String(o.email).includes('@');
         return `<tr>
-          <td class="sr">${i+1}</td>
+          <td>
+            <div class="track-cell" id="tc-${o.orderId}">
+              <span class="track-no" title="Click to edit" onclick="editTracking('${o.orderId}','${o.trackingNo||''}')">${o.trackingNo||'——'}</span>
+            </div>
+          </td>
           <td><span class="order-id">${o.orderId}</span></td>
           <td>
             <div class="cust-name">${o.name || '—'}</div>
@@ -310,6 +320,36 @@ async function updateStatus(orderId, status, postViews) {
     if (!data.success) throw new Error(data.message);
     await loadOrders();
   } catch(e) { alert('Error: ' + e.message); loadOrders(); }
+}
+
+function editTracking(orderId, current) {
+  const cell = document.getElementById('tc-' + orderId);
+  if (!cell) return;
+  cell.innerHTML = `
+    <input class="track-input-inline" id="ti-${orderId}" value="${current}" maxlength="6" inputmode="numeric"
+      onkeydown="if(event.key==='Enter')saveTracking('${orderId}')" />
+    <button class="btn-save-track" onclick="saveTracking('${orderId}')">✓</button>`;
+  document.getElementById('ti-' + orderId).focus();
+}
+
+async function saveTracking(orderId) {
+  const input = document.getElementById('ti-' + orderId);
+  if (!input) return;
+  const val = input.value.trim();
+  if (!val) { alert('Track number daalo'); return; }
+  try {
+    const res = await fetch(GAS_URL + '?action=updateTracking', {
+      method: 'POST', headers: {'Content-Type':'text/plain'},
+      body: JSON.stringify({ orderId, trackingNo: val }), redirect: 'follow'
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message);
+    // Update in allOrders locally
+    const o = allOrders.find(x => x.orderId === orderId);
+    if (o) o.trackingNo = val;
+    const cell = document.getElementById('tc-' + orderId);
+    if (cell) cell.innerHTML = `<span class="track-no" title="Click to edit" onclick="editTracking('${orderId}','${val}')">${val}</span>`;
+  } catch(e) { alert('Error: ' + e.message); }
 }
 
 function closeModal() {

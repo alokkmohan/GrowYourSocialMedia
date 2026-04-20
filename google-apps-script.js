@@ -82,6 +82,7 @@ function onSheetEdit(e) {
 function doGet(e) {
   const action = (e && e.parameter && e.parameter.action) || '';
   if (action === 'getOrders') return jsonResponse_(getOrdersForDashboard_());
+  if (action === 'getStatus') return jsonResponse_(getOrderStatus_(e.parameter.trackingNo || ''));
   return jsonResponse_({ success: true, service: 'boostkaro-payments', date: new Date().toISOString() });
 }
 
@@ -90,7 +91,7 @@ function getOrdersForDashboard_() {
     const sheet = getOrdersSheet_();
     const lastRow = sheet.getLastRow();
     if (lastRow < 2) return { success: true, orders: [] };
-    const values = sheet.getRange(2, 1, lastRow - 1, 34).getValues();
+    const values = sheet.getRange(2, 1, lastRow - 1, 36).getValues();
     const orders = values
       .filter(function(r) { return r[0]; })
       .map(function(r) {
@@ -115,6 +116,7 @@ function getOrdersForDashboard_() {
           viewsGained:    r[26],
           emailSent:      r[29],
           reportSent:     r[30],
+          trackingNo:     r[35],
         };
       });
     return { success: true, orders: orders };
@@ -130,6 +132,7 @@ function doPost(e) {
     if (action === 'createOrder')    return jsonResponse_(createOrder_(payload));
     if (action === 'verifyPayment')  return jsonResponse_(verifyPayment_(payload));
     if (action === 'updateStatus')   return jsonResponse_(updateStatusFromDashboard_(payload));
+    if (action === 'updateTracking') return jsonResponse_(updateTracking_(payload));
     return jsonResponse_({ success: false, message: 'Unknown action.' });
   } catch (err) {
     return jsonResponse_({ success: false, message: err.message });
@@ -144,6 +147,7 @@ function createOrder_(payload) {
   validateOrderPayload_(payload);
   const config = getConfig_();
   const publicOrderId = 'BK' + Date.now();
+  const trackingNo = String(Math.floor(10000 + Math.random() * 90000));
   const amountInPaise = Math.round(Number(payload.amount) * 100);
 
   const razorpayOrder = createRazorpayOrder_(config, {
@@ -177,12 +181,14 @@ function createOrder_(payload) {
     verificationStatus: 'Pending',
     campaignStatus: 'Not Started',
     campaignId: '',
-    notes: payload.unit || ''
+    notes: payload.unit || '',
+    trackingNo: trackingNo
   });
 
   return {
     success: true,
     publicOrderId,
+    trackingNo,
     razorpayOrderId: razorpayOrder.id,
     amount: amountInPaise,
     currency: razorpayOrder.currency || 'INR'
@@ -709,7 +715,9 @@ function ensureHeaders_(sheet) {
     // Admin
     'Refund Status', 'Notes',
     // Quick Action
-    'WhatsApp Link'
+    'WhatsApp Link',
+    // Tracking
+    'Tracking No'
   ]];
   if (sheet.getLastRow() === 0) {
     sheet.getRange(1, 1, 1, headers[0].length).setValues(headers);
@@ -787,6 +795,7 @@ function upsertOrderRow_(data) {
   sheet.appendRow(row);
   const newRow = sheet.getLastRow();
   addWhatsAppFormula_(sheet, newRow, data);
+  if (data.trackingNo) sheet.getRange(newRow, 36).setValue(data.trackingNo);
   return newRow;
 }
 
@@ -888,7 +897,7 @@ function findOrderRow_(publicOrderId) {
   const sheet = getOrdersSheet_();
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) return null;
-  const values = sheet.getRange(2, 1, lastRow - 1, 34).getValues();
+  const values = sheet.getRange(2, 1, lastRow - 1, 36).getValues();
   for (var i = 0; i < values.length; i++) {
     if (values[i][0] !== publicOrderId) continue;
     return {
@@ -926,10 +935,50 @@ function findOrderRow_(publicOrderId) {
       finalReportSent:  values[i][30],  // col 31
       whatsappNotified: values[i][31],  // col 32
       refundStatus:     values[i][32],  // col 33
-      notes:            values[i][33]   // col 34
+      notes:            values[i][33],  // col 34
+      trackingNo:       values[i][35]   // col 36
     };
   }
   return null;
+}
+
+function getOrderStatus_(trackingNo) {
+  if (!trackingNo) return { success: false, message: 'Tracking number required.' };
+  const sheet = getOrdersSheet_();
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return { success: false, message: 'Order not found.' };
+  const values = sheet.getRange(2, 1, lastRow - 1, 36).getValues();
+  for (var i = 0; i < values.length; i++) {
+    if (String(values[i][35]).trim() !== String(trackingNo).trim()) continue;
+    const cs = String(values[i][21] || 'Not Started');
+    return {
+      success: true,
+      trackingNo:     String(values[i][35]),
+      name:           values[i][13],
+      platform:       values[i][5],
+      service:        values[i][6],
+      plan:           values[i][7],
+      amount:         values[i][9],
+      paymentStatus:  values[i][19],
+      campaignStatus: cs,
+      preViews:       values[i][17],
+      postViews:      values[i][25],
+      viewsGained:    values[i][26],
+      createdAt:      values[i][4],
+      campaignStart:  values[i][23],
+      campaignEnd:    values[i][24]
+    };
+  }
+  return { success: false, message: 'Tracking number nahi mila. Sahi number check karo.' };
+}
+
+function updateTracking_(payload) {
+  if (!payload || !payload.orderId || !payload.trackingNo) throw new Error('Missing orderId or trackingNo.');
+  const row = findOrderRow_(payload.orderId);
+  if (!row) throw new Error('Order not found.');
+  const sheet = getOrdersSheet_();
+  sheet.getRange(row.rowNumber, 36).setValue(String(payload.trackingNo));
+  return { success: true };
 }
 
 // ─────────────────────────────────────────────

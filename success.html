@@ -4,44 +4,42 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Order Confirm Ho Gaya — BoostKaro</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Inter', sans-serif; background: #fff9f5; min-height: 100vh; padding: 24px 16px; }
-
     .logo { display: inline-block; font-size: 1.4rem; font-weight: 800; color: #f97316; text-decoration: none; margin-bottom: 20px; }
-
-    .card {
-      background: #fff;
-      border-radius: 20px;
-      border: 1.5px solid #ffe8d6;
-      padding: 32px 24px;
-      max-width: 520px;
-      margin: 0 auto;
-      box-shadow: 0 8px 32px rgba(249,115,22,0.08);
-    }
-
-    .success-icon {
-      width: 72px; height: 72px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #f97316, #ec4899);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 2rem; margin: 0 auto 16px;
-    }
-
+    .card { background: #fff; border-radius: 20px; border: 1.5px solid #ffe8d6; padding: 32px 24px; max-width: 520px; margin: 0 auto; box-shadow: 0 8px 32px rgba(249,115,22,0.08); }
+    .success-icon { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, #f97316, #ec4899); display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 16px; }
     .card h1 { text-align: center; font-size: 1.6rem; color: #1a0a00; margin-bottom: 6px; }
     .card .subtitle { text-align: center; color: #a8784a; font-size: 0.95rem; margin-bottom: 24px; }
 
+    /* TRACKING NUMBER — most important */
+    .track-box {
+      background: linear-gradient(135deg, #f97316, #ec4899);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 20px;
+      color: #fff;
+    }
+    .track-label { font-size: 0.85rem; font-weight: 600; opacity: 0.9; margin-bottom: 6px; letter-spacing: 0.05em; text-transform: uppercase; }
+    .track-number { font-size: 2.8rem; font-weight: 800; letter-spacing: 0.12em; line-height: 1; }
+    .track-hint { font-size: 0.78rem; opacity: 0.85; margin-top: 8px; }
+    .btn-check-status {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      background: rgba(255,255,255,0.2); border: 1.5px solid rgba(255,255,255,0.5);
+      color: #fff; border-radius: 10px; padding: 10px 18px; margin-top: 12px;
+      font-weight: 700; font-size: 0.9rem; text-decoration: none; cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-check-status:hover { background: rgba(255,255,255,0.3); }
+
     /* Timeline */
-    .timeline { display: flex; flex-direction: column; gap: 0; margin: 24px 0; }
+    .timeline { display: flex; flex-direction: column; gap: 0; margin: 20px 0; }
     .tl-step { display: flex; gap: 14px; position: relative; }
     .tl-left { display: flex; flex-direction: column; align-items: center; }
-    .tl-dot {
-      width: 36px; height: 36px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1rem; flex-shrink: 0;
-    }
+    .tl-dot { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
     .tl-dot.done { background: #dcfce7; border: 2px solid #16a34a; }
     .tl-dot.active { background: linear-gradient(135deg, #f97316, #ec4899); color: #fff; }
     .tl-dot.pending { background: #f1f5f9; border: 2px solid #cbd5e1; }
@@ -49,67 +47,33 @@
     .tl-content { padding-bottom: 24px; }
     .tl-content h4 { font-size: 0.95rem; font-weight: 700; color: #1a0a00; margin-bottom: 2px; }
     .tl-content p { font-size: 0.85rem; color: #a8784a; line-height: 1.5; }
-    .tl-badge {
-      display: inline-block; margin-top: 4px;
-      padding: 3px 10px; border-radius: 999px;
-      font-size: 0.78rem; font-weight: 700;
-    }
+    .tl-badge { display: inline-block; margin-top: 4px; padding: 3px 10px; border-radius: 999px; font-size: 0.78rem; font-weight: 700; }
     .tl-badge.done { background: #dcfce7; color: #166534; }
     .tl-badge.active { background: #fef3c7; color: #92400e; }
     .tl-badge.pending { background: #f1f5f9; color: #64748b; }
 
     /* Order Details */
-    .order-box {
-      background: #fff9f5;
-      border: 1.5px solid #ffe8d6;
-      border-radius: 14px;
-      padding: 16px;
-      margin: 20px 0;
-    }
+    .order-box { background: #fff9f5; border: 1.5px solid #ffe8d6; border-radius: 14px; padding: 16px; margin: 20px 0; }
     .order-box h3 { font-size: 0.85rem; color: #a8784a; font-weight: 700; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
     .order-row { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid #ffe8d6; font-size: 0.9rem; }
     .order-row:last-child { border-bottom: none; }
     .order-row span:first-child { color: #a8784a; }
     .order-row span:last-child { color: #1a0a00; font-weight: 700; text-align: right; word-break: break-all; }
 
-    /* Info box */
-    .info-box {
-      background: #f0fdf4;
-      border: 1.5px solid #86efac;
-      border-radius: 12px;
-      padding: 14px 16px;
-      margin: 16px 0;
-      font-size: 0.88rem;
-      color: #166534;
-      line-height: 1.6;
-    }
-    .info-box strong { display: block; margin-bottom: 4px; font-size: 0.95rem; }
-
     /* Buttons */
-    .btn-wa {
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      width: 100%; padding: 14px;
-      background: #22c55e; color: #fff;
-      border-radius: 12px; text-decoration: none;
-      font-weight: 700; font-size: 1rem;
-      margin-top: 16px;
-    }
+    .btn-wa { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 14px; background: #22c55e; color: #fff; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 1rem; margin-top: 12px; }
     .btn-wa:hover { background: #16a34a; }
-    .btn-home {
-      display: flex; align-items: center; justify-content: center;
-      width: 100%; padding: 12px;
-      background: #fff9f5; color: #f97316;
-      border: 2px solid #f97316;
-      border-radius: 12px; text-decoration: none;
-      font-weight: 700; font-size: 0.95rem;
-      margin-top: 10px;
-    }
+    .btn-pdf { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background: #fff9f5; color: #f97316; border: 2px solid #f97316; border-radius: 12px; font-weight: 700; font-size: 0.95rem; margin-top: 10px; cursor: pointer; font-family: inherit; }
+    .btn-pdf:hover { background: #fff0e8; }
+    .btn-home { display: flex; align-items: center; justify-content: center; width: 100%; padding: 12px; background: #f1f5f9; color: #64748b; border: none; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 0.95rem; margin-top: 10px; }
+    .screenshot-tip { text-align: center; font-size: 0.82rem; color: #a8784a; margin-top: 16px; }
 
-    .screenshot-tip {
-      text-align: center;
-      font-size: 0.82rem;
-      color: #a8784a;
-      margin-top: 16px;
+    /* Print styles */
+    @media print {
+      body { background: #fff; padding: 0; }
+      .btn-wa, .btn-pdf, .btn-home, .btn-check-status, .screenshot-tip { display: none !important; }
+      .card { box-shadow: none; border: 1px solid #ddd; }
+      .track-box { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     }
   </style>
 </head>
@@ -117,44 +81,42 @@
   <div style="max-width:520px;margin:0 auto;">
     <a href="index.html" class="logo">⚡ BoostKaro</a>
 
-    <div class="card">
+    <div class="card" id="receiptCard">
       <div class="success-icon">🎉</div>
       <h1>Payment Ho Gaya!</h1>
-      <p class="subtitle">Aapka order confirm ho gaya hai — neeche poori jankari dekho</p>
+      <p class="subtitle">Aapka order confirm ho gaya hai</p>
+
+      <!-- TRACKING NUMBER — most prominent -->
+      <div class="track-box">
+        <div class="track-label">📦 Aapka Track Number</div>
+        <div class="track-number" id="trackNum">——</div>
+        <div class="track-hint">Is number se apna order track karo — save kar lo!</div>
+        <a class="btn-check-status" id="statusLink" href="status.html">🔍 Status Check Karo</a>
+      </div>
 
       <!-- Timeline -->
       <div class="timeline">
         <div class="tl-step">
-          <div class="tl-left">
-            <div class="tl-dot done">✅</div>
-            <div class="tl-line"></div>
-          </div>
+          <div class="tl-left"><div class="tl-dot done">✅</div><div class="tl-line"></div></div>
           <div class="tl-content">
             <h4>Payment Confirm</h4>
             <p>Aapka payment successfully receive ho gaya</p>
             <span class="tl-badge done">Ho Gaya ✓</span>
           </div>
         </div>
-
         <div class="tl-step">
-          <div class="tl-left">
-            <div class="tl-dot active">🚀</div>
-            <div class="tl-line"></div>
-          </div>
+          <div class="tl-left"><div class="tl-dot active">🚀</div><div class="tl-line"></div></div>
           <div class="tl-content">
             <h4>Campaign Shuru Ho Raha Hai</h4>
-            <p>Aapka ad campaign jald hi live hoga. Confirmation email aur WhatsApp par message milega</p>
+            <p>Aapka ad campaign jald hi live hoga</p>
             <span class="tl-badge active">Processing...</span>
           </div>
         </div>
-
         <div class="tl-step">
-          <div class="tl-left">
-            <div class="tl-dot pending">📊</div>
-          </div>
+          <div class="tl-left"><div class="tl-dot pending">📊</div></div>
           <div class="tl-content">
             <h4>Final Report Milega</h4>
-            <p>Campaign khatam hone par views/results ki poori report email par aayegi</p>
+            <p>Campaign khatam hone par views ki poori report email par aayegi</p>
             <span class="tl-badge pending">Upcoming</span>
           </div>
         </div>
@@ -166,20 +128,16 @@
         <div id="orderDetails"></div>
       </div>
 
-      <!-- Info Box -->
-      <div class="info-box">
-        <strong>📧 Email + WhatsApp par updates milenge</strong>
-        Jab campaign live hoga — aapko email aur WhatsApp dono par notification aayega. Koi kaam karne ki zaroorat nahi!
-      </div>
-
-      <!-- WhatsApp Button -->
+      <!-- WhatsApp -->
       <a class="btn-wa" id="waBtn" href="https://wa.me/917054411333" target="_blank" rel="noopener noreferrer">
         💬 WhatsApp pe Status Poochho
       </a>
 
-      <a href="index.html" class="btn-home">🏠 Home Pe Wapas Jaao</a>
+      <!-- PDF Download -->
+      <button class="btn-pdf" onclick="downloadReceipt()">📄 Receipt Download Karo (PDF)</button>
 
-      <p class="screenshot-tip">📸 Is page ka screenshot le lo — Order ID save karo</p>
+      <a href="index.html" class="btn-home">🏠 Home Pe Wapas Jaao</a>
+      <p class="screenshot-tip">📸 Track Number save karo — <strong id="trackNumSmall"></strong></p>
     </div>
   </div>
 
@@ -189,15 +147,27 @@
       let stored = {};
       try { stored = JSON.parse(sessionStorage.getItem('boostkaro_last_order') || '{}'); } catch (e) {}
 
-      const orderId   = params.get('orderId')   || stored.orderId   || '-';
-      const plan      = params.get('plan')       || stored.plan      || '-';
-      const amount    = params.get('amount')     || stored.amount    || '0';
-      const email     = params.get('email')      || stored.email     || '-';
-      const phone     = stored.phone || '-';
-      const paymentId = params.get('paymentId')  || stored.paymentId || '-';
-      const platform  = stored.platform || '';
+      const orderId    = params.get('orderId')    || stored.orderId    || '-';
+      const trackingNo = params.get('trackingNo') || stored.trackingNo || '-';
+      const plan       = params.get('plan')        || stored.plan       || '-';
+      const amount     = params.get('amount')      || stored.amount     || '0';
+      const email      = params.get('email')       || stored.email      || '-';
+      const phone      = stored.phone || '-';
+      const paymentId  = params.get('paymentId')   || stored.paymentId  || '-';
+      const platform   = stored.platform || '';
 
+      // Show tracking number
+      document.getElementById('trackNum').textContent = trackingNo !== '-' ? trackingNo : '——';
+      document.getElementById('trackNumSmall').textContent = trackingNo !== '-' ? trackingNo : '';
+
+      // Status link
+      if (trackingNo && trackingNo !== '-') {
+        document.getElementById('statusLink').href = 'status.html?track=' + encodeURIComponent(trackingNo);
+      }
+
+      // Order rows
       const rows = [
+        ['Track Number', trackingNo],
         ['Order ID', orderId],
         ['Plan', plan],
         ['Amount Paid', '₹' + Number(amount).toLocaleString('en-IN')],
@@ -206,15 +176,18 @@
         ['Email', email],
         ['WhatsApp', phone],
       ];
-
       document.getElementById('orderDetails').innerHTML = rows.map(function(r) {
         return '<div class="order-row"><span>' + r[0] + '</span><span>' + r[1] + '</span></div>';
       }).join('');
 
-      // WhatsApp message with order ID
-      const waMsg = encodeURIComponent('नमस्ते! मेरा Order ID है: ' + orderId + ' — कृपया campaign status बताएं।');
+      // WhatsApp message
+      const waMsg = encodeURIComponent('Namaskar! Mera Track Number hai: ' + trackingNo + ' — Order ID: ' + orderId + ' — kripya campaign status batayein. 🙏');
       document.getElementById('waBtn').href = 'https://wa.me/917054411333?text=' + waMsg;
     })();
+
+    function downloadReceipt() {
+      window.print();
+    }
   </script>
 </body>
 </html>

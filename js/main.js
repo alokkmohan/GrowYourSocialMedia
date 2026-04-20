@@ -240,6 +240,7 @@ async function initiatePayment() {
     }
 
     const publicOrderId = backendOrder?.publicOrderId || fallbackOrderId;
+    const trackingNo = backendOrder?.trackingNo || '';
     const razorpayOrderId = backendOrder?.razorpayOrderId || undefined;
     const amountInPaise = Number(backendOrder?.amount || p.price * 100);
     const currency = backendOrder?.currency || 'INR';
@@ -271,7 +272,7 @@ async function initiatePayment() {
       },
       handler: (response) => {
         paymentInFlight = false;
-        onPaymentSuccess(response, publicOrderId, razorpayOrderId);
+        onPaymentSuccess(response, publicOrderId, razorpayOrderId, trackingNo);
       },
       modal: {
         ondismiss: () => {
@@ -294,7 +295,7 @@ async function initiatePayment() {
   }
 }
 
-async function onPaymentSuccess(response, orderId, expectedRazorpayOrderId) {
+async function onPaymentSuccess(response, orderId, expectedRazorpayOrderId, trackingNo) {
   const p = order.plan;
   const payload = {
     orderId,
@@ -331,16 +332,19 @@ async function onPaymentSuccess(response, orderId, expectedRazorpayOrderId) {
 
   persistOrderSummary({
     orderId,
+    trackingNo: trackingNo || '',
     plan: `${p.qty} ${p.unit}`,
     amount: p.price,
     email: order.email,
     phone: order.phone,
+    platform: order.platform,
     paymentId: payload.razorpayPaymentId,
     status,
   });
 
   const params = new URLSearchParams({
     orderId,
+    trackingNo: trackingNo || '',
     plan: `${p.qty} ${p.unit}`,
     amount: p.price,
     email: order.email,
