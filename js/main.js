@@ -3,7 +3,7 @@
 // =============================================
 
 const RAZORPAY_KEY = 'rzp_live_SfEnPdfoYwU0WJ';
-const PAYMENT_API_URL = 'https://script.google.com/macros/s/AKfycbwn6Os7sfzauNczABgOCx8ex1HaVDpAOSruS7a4ApUiBUdiSPJR4BNE1o_5Ih-TyttK/exec';
+const PAYMENT_API_URL = 'https://script.google.com/macros/s/AKfycbxdoX_MgaBA6iqy78dUB04upUC2IIT9ZZrODE7RbYhzH9Vwn2-3GUZLVC6ddunMOPzT/exec';
 const GAS_WEBHOOK_URL = '';
 
 const order = { platform: '', objective: '', plan: null, link: '', phone: '', email: '' };
