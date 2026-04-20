@@ -515,12 +515,49 @@ function ensureHeaders_(sheet) {
   if (sheet.getLastRow() === 0) {
     sheet.getRange(1, 1, 1, headers[0].length).setValues(headers);
     sheet.setFrozenRows(1);
+    applySheetDropdowns_(sheet);
     return;
   }
   const current = sheet.getRange(1, 1, 1, headers[0].length).getValues()[0];
   if (headers[0].some(function (h, i) { return current[i] !== h; })) {
     sheet.getRange(1, 1, 1, headers[0].length).setValues(headers);
   }
+  applySheetDropdowns_(sheet);
+}
+
+function applySheetDropdowns_(sheet) {
+  const lastRow = Math.max(sheet.getLastRow(), 100);
+
+  // Col 21: Campaign Status
+  const campaignRule = SpreadsheetApp.newDataValidation()
+    .requireValueInList(['Not Started', 'Launched', 'Completed', 'Campaign Error', 'Refunded'], true)
+    .setAllowInvalid(false).build();
+  sheet.getRange(2, 21, lastRow, 1).setDataValidation(campaignRule);
+
+  // Col 20: Verification Status
+  const verifyRule = SpreadsheetApp.newDataValidation()
+    .requireValueInList(['Pending', 'Verified', 'Failed'], true)
+    .setAllowInvalid(false).build();
+  sheet.getRange(2, 20, lastRow, 1).setDataValidation(verifyRule);
+
+  // Col 19: Payment Status
+  const payRule = SpreadsheetApp.newDataValidation()
+    .requireValueInList(['Created', 'Paid', 'Verification Failed', 'Refunded'], true)
+    .setAllowInvalid(false).build();
+  sheet.getRange(2, 19, lastRow, 1).setDataValidation(payRule);
+
+  // Col 32: Refund Status
+  const refundRule = SpreadsheetApp.newDataValidation()
+    .requireValueInList(['', 'Requested', 'Processing', 'Done'], true)
+    .setAllowInvalid(false).build();
+  sheet.getRange(2, 32, lastRow, 1).setDataValidation(refundRule);
+}
+
+// Run this once manually to apply dropdowns to existing sheet
+function setupSheetDropdowns() {
+  const sheet = getOrdersSheet_();
+  applySheetDropdowns_(sheet);
+  Logger.log('Dropdowns applied!');
 }
 
 function upsertOrderRow_(data) {
