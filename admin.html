@@ -238,7 +238,7 @@ function renderTable() {
         <th>Video Link</th>
         <th>Plan / Budget</th>
         <th>Status</th>
-        <th>Actions</th>
+        <th>Action</th>
       </tr>
     </thead>
     <tbody>
@@ -285,10 +285,7 @@ function renderTable() {
             </select>
           </td>
           <td>
-            <div class="action-col">
-              <a href="${waLink}" target="_blank" class="btn-wa">📱 WhatsApp</a>
-              ${hasEmail ? `<a href="mailto:${o.email}?subject=${mailSubject}&body=${mailBody}" class="btn-mail">✉️ Mail</a>` : ''}
-            </div>
+            ${hasEmail ? `<a href="mailto:${o.email}?subject=${mailSubject}&body=${mailBody}" class="btn-mail">✉️ Mail</a>` : '<span style="color:#cbd5e1;font-size:0.78rem">No email</span>'}
           </td>
         </tr>`;
       }).join('')}
