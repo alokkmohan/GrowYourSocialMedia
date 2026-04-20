@@ -254,6 +254,23 @@ function showPayLoading(show) {
   overlay.style.display = show ? 'flex' : 'none';
 }
 
+function showVerifyLoading(show) {
+  let overlay = document.getElementById('verifyLoadingOverlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'verifyLoadingOverlay';
+    overlay.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(249,115,22,0.92);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:18px';
+    overlay.innerHTML = `
+      <div style="width:64px;height:64px;border:5px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:rzpSpin 0.7s linear infinite"></div>
+      <div style="text-align:center;">
+        <div style="color:#fff;font-weight:800;font-size:1.3rem;margin-bottom:6px;">🎉 Payment Ho Gaya!</div>
+        <div style="color:rgba(255,255,255,0.9);font-size:0.95rem;">Order confirm ho raha hai — rukiye...</div>
+      </div>`;
+    document.body.appendChild(overlay);
+  }
+  overlay.style.display = show ? 'flex' : 'none';
+}
+
 async function initiatePayment() {
   if (paymentInFlight) return;
   if (!order.plan || !order.phone || !order.link) {
@@ -318,6 +335,7 @@ async function initiatePayment() {
       handler: (response) => {
         paymentInFlight = false;
         showPayLoading(false);
+        showVerifyLoading(true);
         onPaymentSuccess(response, publicOrderId, razorpayOrderId, trackingNo);
       },
       modal: {
