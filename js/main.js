@@ -211,6 +211,18 @@ function proceedToPayment() {
   reveal('paySection');
 }
 
+function showPayLoading(show) {
+  let overlay = document.getElementById('payLoadingOverlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'payLoadingOverlay';
+    overlay.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:14px';
+    overlay.innerHTML = '<div style="width:52px;height:52px;border:4px solid rgba(255,255,255,0.3);border-top-color:#f97316;border-radius:50%;animation:rzpSpin 0.7s linear infinite"></div><div style="color:#fff;font-weight:700;font-size:1rem">Payment window khul raha hai...</div><style>@keyframes rzpSpin{to{transform:rotate(360deg)}}</style>';
+    document.body.appendChild(overlay);
+  }
+  overlay.style.display = show ? 'flex' : 'none';
+}
+
 async function initiatePayment() {
   if (paymentInFlight) return;
   if (!order.plan || !order.phone || !order.link) {
@@ -219,6 +231,7 @@ async function initiatePayment() {
   }
 
   paymentInFlight = true;
+  showPayLoading(true);
   const p = order.plan;
   const fallbackOrderId = 'BK' + Date.now();
 
@@ -263,20 +276,23 @@ async function initiatePayment() {
       config: {
         display: {
           blocks: {
-            upi: { name: '⚡ UPI se Pay Karo (Sabse Aasaan)', instruments: [{ method: 'upi', flows: ['collect'] }] },
-            other: { name: 'Card / Net Banking / Wallet', instruments: [{ method: 'card' }, { method: 'netbanking' }, { method: 'wallet' }] },
+            upi_apps: { name: '⚡ Google Pay / PhonePe / BHIM', instruments: [{ method: 'upi', flows: ['intent'] }] },
+            upi_id:   { name: '🔢 UPI ID se Pay Karo', instruments: [{ method: 'upi', flows: ['collect'] }] },
+            other:    { name: '💳 Card / Net Banking / Wallet', instruments: [{ method: 'card' }, { method: 'netbanking' }, { method: 'wallet' }] },
           },
-          sequence: ['block.upi', 'block.other'],
+          sequence: ['block.upi_apps', 'block.upi_id', 'block.other'],
           preferences: { show_default_blocks: false },
         },
       },
       handler: (response) => {
         paymentInFlight = false;
+        showPayLoading(false);
         onPaymentSuccess(response, publicOrderId, razorpayOrderId, trackingNo);
       },
       modal: {
         ondismiss: () => {
           paymentInFlight = false;
+          showPayLoading(false);
           window.location.href = 'cancel.html?orderId=' + encodeURIComponent(publicOrderId);
         },
       },
@@ -285,11 +301,14 @@ async function initiatePayment() {
     const rzp = new Razorpay(options);
     rzp.on('payment.failed', (r) => {
       paymentInFlight = false;
+      showPayLoading(false);
       alert('Payment failed: ' + (r?.error?.description || 'Unknown error'));
     });
     rzp.open();
+    showPayLoading(false);
   } catch (error) {
     paymentInFlight = false;
+    showPayLoading(false);
     console.error(error);
     showError('Payment setup failed: ' + (error?.message || error));
   }
