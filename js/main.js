@@ -290,7 +290,7 @@ async function initiatePayment() {
   } catch (error) {
     paymentInFlight = false;
     console.error(error);
-    showError('Payment setup failed. Please try again in a moment.');
+    showError('Payment setup failed: ' + (error?.message || error));
   }
 }
 
