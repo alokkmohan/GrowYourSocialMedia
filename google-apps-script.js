@@ -16,6 +16,7 @@
 //   SITE_URL                — optional
 
 const DEFAULT_SHEET_NAME = 'Orders';
+const SUMMARY_SHEET_NAME = 'Jankari';
 const AD_BUDGET_RATIO = 0.80; // 80% of order goes to ads
 
 // ─────────────────────────────────────────────
@@ -214,6 +215,22 @@ function verifyPayment_(payload) {
   });
 
   if (verified) {
+    // Fetch full Razorpay payment details (method, bank, VPA) and save to both sheets
+    var paymentMethodStr = '';
+    try {
+      const rpDetails = fetchRazorpayPaymentDetails_(payload.razorpayPaymentId, config);
+      if (rpDetails) {
+        const method = rpDetails.method || '';
+        const bank = rpDetails.bank || rpDetails.wallet || '';
+        const vpa = (rpDetails.upi && rpDetails.upi.vpa) ? rpDetails.upi.vpa : '';
+        const card = rpDetails.card ? (rpDetails.card.network + ' ' + rpDetails.card.issuer).trim() : '';
+        paymentMethodStr = [method, bank, vpa, card].filter(Boolean).join(' / ');
+        const noteStr = ['Method:' + method, bank ? 'Bank:' + bank : '', vpa ? 'UPI:' + vpa : '', card ? 'Card:' + card : ''].filter(Boolean).join(' | ');
+        const sheet = getOrdersSheet_();
+        sheet.getRange(row.rowNumber, 34).setValue(noteStr); // Notes col 34
+      }
+    } catch(rpErr) { Logger.log('Razorpay fetch err: ' + rpErr.message); }
+
     // Fetch pre-campaign views
     const preViews = fetchPreCampaignViews_(row.link, row.platform);
     if (preViews !== null) {
@@ -236,6 +253,27 @@ function verifyPayment_(payload) {
       razorpayPaymentId: payload.razorpayPaymentId
     }, config);
     markNotificationSent_(row.rowNumber, 'email');
+
+    // Write to clean Jankari sheet
+    try {
+      upsertJankariRow_({
+        timestamp: row.timestamp,
+        orderId: payload.orderId,
+        name: row.name,
+        phone: row.phone,
+        email: row.email,
+        platform: row.platform,
+        service: row.service,
+        plan: row.quantity,
+        amount: row.amount,
+        adBudget: Math.round(Number(row.amount) * AD_BUDGET_RATIO),
+        paymentMethod: paymentMethodStr,
+        razorpayPaymentId: payload.razorpayPaymentId,
+        link: row.link,
+        campaignStatus: 'Not Started',
+        preViews: preViews || ''
+      });
+    } catch(je) { Logger.log('Jankari write err: ' + je.message); }
 
     // Auto-launch ad campaign
     try {
@@ -508,6 +546,17 @@ function createRazorpayOrder_(config, payload) {
   return body;
 }
 
+function fetchRazorpayPaymentDetails_(paymentId, config) {
+  const res = UrlFetchApp.fetch('https://api.razorpay.com/v1/payments/' + paymentId, {
+    method: 'get',
+    headers: { Authorization: 'Basic ' + Utilities.base64Encode(config.razorpayKeyId + ':' + config.razorpayKeySecret) },
+    muteHttpExceptions: true
+  });
+  const body = JSON.parse(res.getContentText());
+  if (body.error) throw new Error(body.error.description);
+  return body;
+}
+
 function verifySignature_(razorpayOrderId, paymentId, signature, secret) {
   const raw = Utilities.computeHmacSha256Signature(razorpayOrderId + '|' + paymentId, secret);
   const generated = raw.map(function (b) {
@@ -519,6 +568,113 @@ function verifySignature_(razorpayOrderId, paymentId, signature, secret) {
 // ─────────────────────────────────────────────
 // GOOGLE SHEET HELPERS
 // ─────────────────────────────────────────────
+
+// ─────────────────────────────────────────────
+// JANKARI SHEET — clean human-readable summary
+// ─────────────────────────────────────────────
+
+function getJankariSheet_() {
+  const config = getConfig_();
+  const ss = SpreadsheetApp.openById(config.sheetId);
+  let sheet = ss.getSheetByName(SUMMARY_SHEET_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(SUMMARY_SHEET_NAME);
+    ss.setActiveSheet(sheet);
+    ss.moveActiveSheet(2); // put it as 2nd tab
+  }
+  ensureJankariHeaders_(sheet);
+  return sheet;
+}
+
+function ensureJankariHeaders_(sheet) {
+  const headers = [[
+    'Date & Time', 'Order ID', 'Customer Name', 'Phone (WhatsApp)', 'Email',
+    'Platform', 'Kya Chahiye', 'Plan', 'Amount Paid (₹)', 'Ad Budget (₹)',
+    'Payment Method', 'Razorpay Payment ID',
+    'Video / Profile Link',
+    'Campaign Status', 'Views Pehle', 'Views Baad', 'Views Mila',
+    'Campaign ID'
+  ]];
+  if (sheet.getLastRow() === 0) {
+    sheet.getRange(1, 1, 1, headers[0].length).setValues(headers);
+    sheet.setFrozenRows(1);
+    // Style header row
+    const hRange = sheet.getRange(1, 1, 1, headers[0].length);
+    hRange.setBackground('#f97316').setFontColor('#ffffff').setFontWeight('bold');
+    sheet.setColumnWidth(1, 130);  // Date
+    sheet.setColumnWidth(2, 120);  // Order ID
+    sheet.setColumnWidth(3, 130);  // Name
+    sheet.setColumnWidth(4, 120);  // Phone
+    sheet.setColumnWidth(5, 160);  // Email
+    sheet.setColumnWidth(6, 100);  // Platform
+    sheet.setColumnWidth(7, 130);  // Kya Chahiye
+    sheet.setColumnWidth(8, 100);  // Plan
+    sheet.setColumnWidth(9, 100);  // Amount
+    sheet.setColumnWidth(10, 100); // Ad Budget
+    sheet.setColumnWidth(11, 110); // Payment Method
+    sheet.setColumnWidth(12, 170); // Razorpay ID
+    sheet.setColumnWidth(13, 250); // Link
+    sheet.setColumnWidth(14, 120); // Campaign Status
+    sheet.setColumnWidth(15, 90);  // Views Before
+    sheet.setColumnWidth(16, 90);  // Views After
+    sheet.setColumnWidth(17, 90);  // Views Gained
+    sheet.setColumnWidth(18, 160); // Campaign ID
+  }
+}
+
+function upsertJankariRow_(data) {
+  const sheet = getJankariSheet_();
+  const lastRow = sheet.getLastRow();
+
+  // Find existing row by Order ID (col 2)
+  let targetRow = -1;
+  if (lastRow >= 2) {
+    const ids = sheet.getRange(2, 2, lastRow - 1, 1).getValues();
+    for (var i = 0; i < ids.length; i++) {
+      if (ids[i][0] === data.orderId) { targetRow = i + 2; break; }
+    }
+  }
+
+  const row = [
+    data.timestamp ? new Date(data.timestamp) : new Date(),
+    data.orderId || '',
+    data.name || '',
+    data.phone || '',
+    data.email || '',
+    data.platform ? (data.platform.charAt(0).toUpperCase() + data.platform.slice(1)) : '',
+    data.service || '',
+    data.plan || data.quantity || '',
+    Number(data.amount) || 0,
+    Number(data.adBudget) || 0,
+    data.paymentMethod || '',
+    data.razorpayPaymentId || '',
+    data.link || '',
+    data.campaignStatus || 'Not Started',
+    data.preViews || '',
+    data.postViews || '',
+    data.viewsGained || '',
+    data.campaignId || ''
+  ];
+
+  if (targetRow > 0) {
+    sheet.getRange(targetRow, 1, 1, row.length).setValues([row]);
+  } else {
+    sheet.appendRow(row);
+    targetRow = sheet.getLastRow();
+    // Alternate row color
+    if (targetRow % 2 === 0) {
+      sheet.getRange(targetRow, 1, 1, row.length).setBackground('#fff9f5');
+    }
+  }
+
+  // Color Campaign Status cell
+  const statusCell = sheet.getRange(targetRow, 14);
+  const cs = data.campaignStatus || '';
+  if (cs === 'Launched')  statusCell.setBackground('#dbeafe').setFontColor('#1d4ed8');
+  else if (cs === 'Completed') statusCell.setBackground('#dcfce7').setFontColor('#166534');
+  else if (cs === 'Campaign Error') statusCell.setBackground('#fee2e2').setFontColor('#dc2626');
+  else statusCell.setBackground('#fef9c3').setFontColor('#92400e');
+}
 
 function getOrdersSheet_() {
   const config = getConfig_();
@@ -672,6 +828,31 @@ function updateStatusFromDashboard_(payload) {
     sendFinalReportEmail_(row, config);
     markNotificationSent_(row.rowNumber, 'report');
   }
+
+  // Sync to Jankari sheet
+  try {
+    upsertJankariRow_({
+      timestamp: row.timestamp,
+      orderId: row.orderId,
+      name: row.name,
+      phone: row.phone,
+      email: row.email,
+      platform: row.platform,
+      service: row.service,
+      plan: row.quantity,
+      amount: row.amount,
+      adBudget: row.adBudget,
+      paymentMethod: '',
+      razorpayPaymentId: row.razorpayPaymentId,
+      link: row.link,
+      campaignStatus: payload.status,
+      preViews: row.preViews,
+      postViews: payload.postViews || row.postViews || '',
+      viewsGained: '',
+      campaignId: payload.campaignId || row.campaignId || ''
+    });
+  } catch(je) { Logger.log('Jankari sync err: ' + je.message); }
+
   return { success: true };
 }
 
@@ -685,15 +866,15 @@ function updateCampaignStatus_(rowNumber, status, campaignId) {
 
 function updatePostCampaignData_(rowNumber, postViews, postFollowers) {
   const sheet = getOrdersSheet_();
-  const row = sheet.getRange(rowNumber, 1, 1, 33).getValues()[0];
-  const preViews = Number(row[16]) || 0;
-  const preFollowers = Number(row[17]) || 0;
-  sheet.getRange(rowNumber, 24).setValue(new Date().toISOString()); // Campaign End
-  sheet.getRange(rowNumber, 25).setValue(postViews);
-  sheet.getRange(rowNumber, 26).setValue(postViews - preViews);
-  sheet.getRange(rowNumber, 27).setValue(postFollowers);
-  sheet.getRange(rowNumber, 28).setValue(postFollowers - preFollowers);
-  sheet.getRange(rowNumber, 21).setValue('Completed');
+  const row = sheet.getRange(rowNumber, 1, 1, 34).getValues()[0];
+  const preViews = Number(row[17]) || 0;      // col 18
+  const preFollowers = Number(row[18]) || 0;  // col 19
+  sheet.getRange(rowNumber, 25).setValue(new Date().toISOString()); // Campaign End col 25
+  sheet.getRange(rowNumber, 26).setValue(postViews);                // Post-Campaign Views col 26
+  sheet.getRange(rowNumber, 27).setValue(postViews - preViews);     // Views Gained col 27
+  sheet.getRange(rowNumber, 28).setValue(postFollowers);            // Post-Campaign Followers col 28
+  sheet.getRange(rowNumber, 29).setValue(postFollowers - preFollowers); // Followers Gained col 29
+  sheet.getRange(rowNumber, 22).setValue('Completed');              // Campaign Status col 22
 }
 
 function markNotificationSent_(rowNumber, type) {
@@ -707,44 +888,45 @@ function findOrderRow_(publicOrderId) {
   const sheet = getOrdersSheet_();
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) return null;
-  const values = sheet.getRange(2, 1, lastRow - 1, 33).getValues();
+  const values = sheet.getRange(2, 1, lastRow - 1, 34).getValues();
   for (var i = 0; i < values.length; i++) {
     if (values[i][0] !== publicOrderId) continue;
     return {
       rowNumber: i + 2,
-      orderId: values[i][0],
-      razorpayOrderId: values[i][1],
-      razorpayPaymentId: values[i][2],
-      razorpaySignature: values[i][3],
-      timestamp: values[i][4],
-      platform: values[i][5],
-      service: values[i][6],
-      quantity: values[i][7],
-      duration: values[i][8],
-      amount: values[i][9],
-      adBudget: values[i][10],
-      profit: values[i][11],
-      razorpayFee: values[i][12],
-      email: values[i][13],
-      phone: values[i][14],
-      link: values[i][15],
-      preViews: values[i][16],
-      preFollowers: values[i][17],
-      paymentStatus: values[i][18],
-      verificationStatus: values[i][19],
-      campaignStatus: values[i][20],
-      campaignId: values[i][21],
-      campaignStart: values[i][22],
-      campaignEnd: values[i][23],
-      postViews: values[i][24],
-      viewsGained: values[i][25],
-      postFollowers: values[i][26],
-      followersGained: values[i][27],
-      confirmEmailSent: values[i][28],
-      finalReportSent: values[i][29],
-      whatsappNotified: values[i][30],
-      refundStatus: values[i][31],
-      notes: values[i][32]
+      orderId:          values[i][0],
+      razorpayOrderId:  values[i][1],
+      razorpayPaymentId:values[i][2],
+      razorpaySignature:values[i][3],
+      timestamp:        values[i][4],
+      platform:         values[i][5],
+      service:          values[i][6],
+      quantity:         values[i][7],
+      duration:         values[i][8],
+      amount:           values[i][9],
+      adBudget:         values[i][10],
+      profit:           values[i][11],
+      razorpayFee:      values[i][12],
+      name:             values[i][13],  // col 14
+      email:            values[i][14],  // col 15
+      phone:            values[i][15],  // col 16
+      link:             values[i][16],  // col 17
+      preViews:         values[i][17],  // col 18
+      preFollowers:     values[i][18],  // col 19
+      paymentStatus:    values[i][19],  // col 20
+      verificationStatus:values[i][20], // col 21
+      campaignStatus:   values[i][21],  // col 22
+      campaignId:       values[i][22],  // col 23
+      campaignStart:    values[i][23],  // col 24
+      campaignEnd:      values[i][24],  // col 25
+      postViews:        values[i][25],  // col 26
+      viewsGained:      values[i][26],  // col 27
+      postFollowers:    values[i][27],  // col 28
+      followersGained:  values[i][28],  // col 29
+      confirmEmailSent: values[i][29],  // col 30
+      finalReportSent:  values[i][30],  // col 31
+      whatsappNotified: values[i][31],  // col 32
+      refundStatus:     values[i][32],  // col 33
+      notes:            values[i][33]   // col 34
     };
   }
   return null;
