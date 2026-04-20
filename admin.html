@@ -244,7 +244,8 @@ function renderTable() {
     <tbody>
       ${rows.map((o,i) => {
         const phone = String(o.phone||'').replace(/\D/g,'');
-        const waMsg = encodeURIComponent('Namaskar ' + (o.name||'') + '! Aapka BoostKaro Order #' + o.orderId + ' — campaign update ke liye message kar rahe hain. 🚀');
+        const statusLabel = o.campaignStatus === 'Launched' ? '🚀 Campaign LIVE hai!' : o.campaignStatus === 'Completed' ? '✅ Campaign Complete ho gaya!' : '⏳ Campaign jald shuru hoga';
+        const waMsg = encodeURIComponent('Namaskar ' + (o.name||'') + '! Aapka BoostKaro Order update:\n\n📦 Track No: ' + (o.trackingNo||o.orderId) + '\n📊 Status: ' + statusLabel + '\n\nStatus check karo: https://boostkaro.dataimpact.in/status.html?track=' + (o.trackingNo||'') + '\n\nKoi sawaal ho to batayein. 🙏');
         const waLink = 'https://wa.me/' + (phone.startsWith('91') ? phone : '91'+phone) + '?text=' + waMsg;
         const sc = o.campaignStatus === 'Launched' ? 's-launched' : o.campaignStatus === 'Completed' ? 's-completed' : 's-pending';
         const videoLink = o.userLink || o.link || '';

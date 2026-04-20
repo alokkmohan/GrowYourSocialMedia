@@ -34,8 +34,8 @@ function onSheetEdit(e) {
     const row = e.range.getRow();
     if (row < 2) return; // skip header
 
-    // Column 21 = Campaign Status
-    if (col !== 21) return;
+    // Column 22 = Campaign Status
+    if (col !== 22) return;
 
     const newStatus = String(e.value || '').trim();
     const rowData = sheet.getRange(row, 1, 1, 34).getValues()[0];
@@ -241,7 +241,7 @@ function verifyPayment_(payload) {
     const preViews = fetchPreCampaignViews_(row.link, row.platform);
     if (preViews !== null) {
       const sheet = getOrdersSheet_();
-      sheet.getRange(row.rowNumber, 17).setValue(preViews);
+      sheet.getRange(row.rowNumber, 18).setValue(preViews); // col 18 = Pre-Campaign Views
     }
 
     sendConfirmationEmail_({
@@ -812,10 +812,10 @@ function addWhatsAppFormula_(sheet, rowNumber, data) {
 
 function updateOrderVerification_(rowNumber, values) {
   const sheet = getOrdersSheet_();
-  sheet.getRange(rowNumber, 3).setValue(values.razorpayPaymentId || '');
-  sheet.getRange(rowNumber, 4).setValue(values.razorpaySignature || '');
-  sheet.getRange(rowNumber, 19).setValue(values.paymentStatus || '');
-  sheet.getRange(rowNumber, 20).setValue(values.verificationStatus || '');
+  sheet.getRange(rowNumber, 3).setValue(values.razorpayPaymentId || '');  // col 3 = Razorpay Payment ID
+  sheet.getRange(rowNumber, 4).setValue(values.razorpaySignature || '');   // col 4 = Razorpay Signature
+  sheet.getRange(rowNumber, 20).setValue(values.paymentStatus || '');      // col 20 = Payment Status
+  sheet.getRange(rowNumber, 21).setValue(values.verificationStatus || ''); // col 21 = Verification Status
 }
 
 function updateStatusFromDashboard_(payload) {
@@ -867,10 +867,9 @@ function updateStatusFromDashboard_(payload) {
 
 function updateCampaignStatus_(rowNumber, status, campaignId) {
   const sheet = getOrdersSheet_();
-  const now = new Date().toISOString();
-  sheet.getRange(rowNumber, 21).setValue(status);
-  sheet.getRange(rowNumber, 22).setValue(campaignId || '');
-  if (status === 'Launched') sheet.getRange(rowNumber, 23).setValue(now);
+  sheet.getRange(rowNumber, 22).setValue(status);        // col 22 = Campaign Status
+  sheet.getRange(rowNumber, 23).setValue(campaignId || ''); // col 23 = Campaign ID
+  if (status === 'Launched') sheet.getRange(rowNumber, 24).setValue(new Date().toISOString()); // col 24 = Campaign Start
 }
 
 function updatePostCampaignData_(rowNumber, postViews, postFollowers) {
@@ -888,9 +887,9 @@ function updatePostCampaignData_(rowNumber, postViews, postFollowers) {
 
 function markNotificationSent_(rowNumber, type) {
   const sheet = getOrdersSheet_();
-  if (type === 'email')     sheet.getRange(rowNumber, 29).setValue('Yes');
-  if (type === 'report')    sheet.getRange(rowNumber, 30).setValue('Yes');
-  if (type === 'whatsapp')  sheet.getRange(rowNumber, 31).setValue('Yes');
+  if (type === 'email')     sheet.getRange(rowNumber, 30).setValue('Yes'); // col 30 = Confirmation Email Sent
+  if (type === 'report')    sheet.getRange(rowNumber, 31).setValue('Yes'); // col 31 = Final Report Sent
+  if (type === 'whatsapp')  sheet.getRange(rowNumber, 32).setValue('Yes'); // col 32 = WhatsApp Notified
 }
 
 function findOrderRow_(publicOrderId) {
