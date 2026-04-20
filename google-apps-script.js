@@ -78,16 +78,57 @@ function onSheetEdit(e) {
 // ENTRY POINTS
 // ─────────────────────────────────────────────
 
-function doGet() {
+function doGet(e) {
+  const action = (e && e.parameter && e.parameter.action) || '';
+  if (action === 'getOrders') return jsonResponse_(getOrdersForDashboard_());
   return jsonResponse_({ success: true, service: 'boostkaro-payments', date: new Date().toISOString() });
+}
+
+function getOrdersForDashboard_() {
+  try {
+    const sheet = getOrdersSheet_();
+    const lastRow = sheet.getLastRow();
+    if (lastRow < 2) return { success: true, orders: [] };
+    const values = sheet.getRange(2, 1, lastRow - 1, 34).getValues();
+    const orders = values
+      .filter(function(r) { return r[0]; })
+      .map(function(r) {
+        return {
+          orderId:        r[0],
+          createdAt:      r[4],
+          platform:       r[5],
+          service:        r[6],
+          plan:           r[7],
+          duration:       r[8],
+          amount:         r[9],
+          adBudget:       r[10],
+          name:           r[13],
+          email:          r[14],
+          phone:          r[15],
+          link:           r[16],
+          preViews:       r[17],
+          paymentStatus:  r[19],
+          campaignStatus: r[20],
+          campaignId:     r[21],
+          postViews:      r[25],
+          viewsGained:    r[26],
+          emailSent:      r[29],
+          reportSent:     r[30],
+        };
+      });
+    return { success: true, orders: orders };
+  } catch(err) {
+    return { success: false, message: err.message };
+  }
 }
 
 function doPost(e) {
   try {
     const action = (e && e.parameter && e.parameter.action) || '';
     const payload = parseJsonBody_(e);
-    if (action === 'createOrder')   return jsonResponse_(createOrder_(payload));
-    if (action === 'verifyPayment') return jsonResponse_(verifyPayment_(payload));
+    if (action === 'createOrder')    return jsonResponse_(createOrder_(payload));
+    if (action === 'verifyPayment')  return jsonResponse_(verifyPayment_(payload));
+    if (action === 'updateStatus')   return jsonResponse_(updateStatusFromDashboard_(payload));
     return jsonResponse_({ success: false, message: 'Unknown action.' });
   } catch (err) {
     return jsonResponse_({ success: false, message: err.message });
@@ -610,6 +651,28 @@ function updateOrderVerification_(rowNumber, values) {
   sheet.getRange(rowNumber, 4).setValue(values.razorpaySignature || '');
   sheet.getRange(rowNumber, 19).setValue(values.paymentStatus || '');
   sheet.getRange(rowNumber, 20).setValue(values.verificationStatus || '');
+}
+
+function updateStatusFromDashboard_(payload) {
+  if (!payload || !payload.orderId || !payload.status) throw new Error('Missing orderId or status.');
+  const row = findOrderRow_(payload.orderId);
+  if (!row) throw new Error('Order not found: ' + payload.orderId);
+  const config = getConfig_();
+
+  updateCampaignStatus_(row.rowNumber, payload.status, payload.campaignId || '');
+
+  if (payload.status === 'Launched') {
+    sendCampaignStartedEmail_(row, config);
+    markNotificationSent_(row.rowNumber, 'email');
+  }
+  if (payload.status === 'Completed') {
+    if (payload.postViews) {
+      updatePostCampaignData_(row.rowNumber, Number(payload.postViews), 0);
+    }
+    sendFinalReportEmail_(row, config);
+    markNotificationSent_(row.rowNumber, 'report');
+  }
+  return { success: true };
 }
 
 function updateCampaignStatus_(rowNumber, status, campaignId) {
