@@ -18,6 +18,16 @@
 const DEFAULT_SHEET_NAME = 'Orders';
 const SUMMARY_SHEET_NAME = 'Jankari';
 const AD_BUDGET_RATIO = 0.80; // 80% of order goes to ads
+const MAX_AUTO_RETRIES = 2;
+const RETRY_DELAY_MINUTES = 15;
+const FRAUD_REVIEW_THRESHOLD = 50;
+const EXACT_DUPLICATE_WINDOW_HOURS = 12;
+const PLAN_BUDGET_CAPS = {
+  199: 120,
+  399: 250,
+  799: 520,
+  1499: 980
+};
 
 // ─────────────────────────────────────────────
 // SHEET EDIT TRIGGER — auto email on status change
@@ -82,7 +92,8 @@ function onSheetEdit(e) {
 function doGet(e) {
   const action = (e && e.parameter && e.parameter.action) || '';
   if (action === 'getOrders') return jsonResponse_(getOrdersForDashboard_());
-  if (action === 'getStatus') return jsonResponse_(getOrderStatus_(e.parameter.trackingNo || ''));
+  if (action === 'getStatus') return jsonResponse_(getOrderStatus_(e.parameter.trackingNo || '', e.parameter.phoneLast4 || ''));
+  if (action === 'processQueue') return jsonResponse_(processQueuedCampaigns_());
   return jsonResponse_({ success: true, service: 'boostkaro-payments', date: new Date().toISOString() });
 }
 
@@ -91,7 +102,7 @@ function getOrdersForDashboard_() {
     const sheet = getOrdersSheet_();
     const lastRow = sheet.getLastRow();
     if (lastRow < 2) return { success: true, orders: [] };
-    const values = sheet.getRange(2, 1, lastRow - 1, 36).getValues();
+    const values = sheet.getRange(2, 1, lastRow - 1, 40).getValues();
     const orders = values
       .filter(function(r) { return r[0]; })
       .map(function(r) {
@@ -117,6 +128,10 @@ function getOrdersForDashboard_() {
           emailSent:      r[29],
           reportSent:     r[30],
           trackingNo:     r[35],
+          fraudScore:     r[36],
+          retryCount:     r[37],
+          nextRetryAt:    r[38],
+          lastError:      r[39],
         };
       });
     return { success: true, orders: orders };
@@ -133,6 +148,7 @@ function doPost(e) {
     if (action === 'verifyPayment')  return jsonResponse_(verifyPayment_(payload));
     if (action === 'updateStatus')   return jsonResponse_(updateStatusFromDashboard_(payload));
     if (action === 'updateTracking') return jsonResponse_(updateTracking_(payload));
+    if (action === 'retryCampaign')  return jsonResponse_(retryCampaignFromDashboard_(payload));
     return jsonResponse_({ success: false, message: 'Unknown action.' });
   } catch (err) {
     return jsonResponse_({ success: false, message: err.message });
@@ -147,8 +163,13 @@ function createOrder_(payload) {
   validateOrderPayload_(payload);
   const config = getConfig_();
   const publicOrderId = 'BK' + Date.now();
-  const trackingNo = String(Math.floor(10000 + Math.random() * 90000));
+  const trackingNo = generateUniqueTrackingNo_();
   const amountInPaise = Math.round(Number(payload.amount) * 100);
+  const risk = assessFraudRisk_(payload);
+
+  if (risk.blocked) {
+    throw new Error(risk.message || 'Duplicate ya suspicious order detect hua. Kripya support se baat karein.');
+  }
 
   const razorpayOrder = createRazorpayOrder_(config, {
     amount: amountInPaise,
@@ -181,8 +202,12 @@ function createOrder_(payload) {
     verificationStatus: 'Pending',
     campaignStatus: 'Not Started',
     campaignId: '',
-    notes: payload.unit || '',
-    trackingNo: trackingNo
+    notes: [payload.unit || '', risk.reason || ''].filter(Boolean).join(' | '),
+    trackingNo: trackingNo,
+    fraudScore: risk.score,
+    retryCount: 0,
+    nextRetryAt: '',
+    lastError: ''
   });
 
   return {
@@ -244,6 +269,8 @@ function verifyPayment_(payload) {
       sheet.getRange(row.rowNumber, 18).setValue(preViews); // col 18 = Pre-Campaign Views
     }
 
+    const adBudget = computeAdBudget_(row.amount);
+
     sendConfirmationEmail_({
       orderId: payload.orderId,
       platform: row.platform,
@@ -251,7 +278,7 @@ function verifyPayment_(payload) {
       unit: row.notes,
       duration: row.duration,
       amount: row.amount,
-      adBudget: Math.round(Number(row.amount) * AD_BUDGET_RATIO),
+      adBudget: adBudget,
       email: row.email,
       phone: row.phone,
       link: row.link,
@@ -272,7 +299,7 @@ function verifyPayment_(payload) {
         service: row.service,
         plan: row.quantity,
         amount: row.amount,
-        adBudget: Math.round(Number(row.amount) * AD_BUDGET_RATIO),
+        adBudget: adBudget,
         paymentMethod: paymentMethodStr,
         razorpayPaymentId: payload.razorpayPaymentId,
         link: row.link,
@@ -281,22 +308,14 @@ function verifyPayment_(payload) {
       });
     } catch(je) { Logger.log('Jankari write err: ' + je.message); }
 
-    // Auto-launch ad campaign
-    try {
-      const adBudget = Math.round(Number(row.amount) * AD_BUDGET_RATIO);
-      const campaignResult = launchCampaign_({
-        orderId: payload.orderId,
-        platform: row.platform,
-        objective: row.service,
-        link: row.link,
-        duration: row.duration,
-        amount: Number(row.amount),
-        adBudget: adBudget
-      }, config);
-      updateCampaignStatus_(row.rowNumber, 'Launched', campaignResult.campaignId || '');
-    } catch (campaignErr) {
-      updateCampaignStatus_(row.rowNumber, 'Campaign Error: ' + campaignErr.message, '');
+    // Launch only if basic safety checks pass; otherwise hold for review.
+    const launchReady = validateCampaignReadiness_(row);
+    if (Number(row.fraudScore || 0) >= FRAUD_REVIEW_THRESHOLD || !launchReady.ok) {
+      setManualReviewState_(row.rowNumber, launchReady.message || 'Manual review required.');
+      return { success: true, verified, orderId: payload.orderId, queued: false, manualReview: true };
     }
+
+    tryLaunchCampaign_(findOrderRow_(payload.orderId), config);
   }
 
   return { success: true, verified, orderId: payload.orderId };
@@ -311,6 +330,59 @@ function launchCampaign_(data, config) {
     return createGoogleAdsCampaign_(data, config);
   }
   return createMetaCampaign_(data, config);
+}
+
+function tryLaunchCampaign_(row, config) {
+  if (!row) throw new Error('Order not found for launch.');
+  const adBudget = computeAdBudget_(row.amount);
+
+  try {
+    updateCampaignStatus_(row.rowNumber, 'Queued', row.campaignId || '');
+    const campaignResult = launchCampaign_({
+      orderId: row.orderId,
+      platform: row.platform,
+      objective: row.service,
+      link: row.link,
+      duration: row.duration,
+      amount: Number(row.amount),
+      adBudget: adBudget
+    }, config);
+    clearRetryMeta_(row.rowNumber);
+    updateCampaignStatus_(row.rowNumber, 'Launched', campaignResult.campaignId || '');
+    return { success: true, campaignId: campaignResult.campaignId || '' };
+  } catch (campaignErr) {
+    return scheduleCampaignRetry_(row.rowNumber, campaignErr.message || 'Campaign launch failed.');
+  }
+}
+
+function processQueuedCampaigns_() {
+  const config = getConfig_();
+  const sheet = getOrdersSheet_();
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return { success: true, processed: 0 };
+
+  const values = sheet.getRange(2, 1, lastRow - 1, 40).getValues();
+  let processed = 0;
+
+  for (var i = 0; i < values.length; i++) {
+    const rowNumber = i + 2;
+    const status = String(values[i][21] || '');
+    const nextRetryAt = values[i][38];
+    const retryDue = !nextRetryAt || new Date(nextRetryAt).getTime() <= Date.now();
+    if (status !== 'Retry Scheduled' && status !== 'Queued') continue;
+    if (!retryDue) continue;
+    const row = findOrderRow_(values[i][0]);
+    if (!row) continue;
+    const ready = validateCampaignReadiness_(row);
+    if (!ready.ok) {
+      setManualReviewState_(row.rowNumber, ready.message);
+      continue;
+    }
+    tryLaunchCampaign_(row, config);
+    processed++;
+  }
+
+  return { success: true, processed: processed };
 }
 
 // ─────────────────────────────────────────────
@@ -678,6 +750,8 @@ function upsertJankariRow_(data) {
   const cs = data.campaignStatus || '';
   if (cs === 'Launched')  statusCell.setBackground('#dbeafe').setFontColor('#1d4ed8');
   else if (cs === 'Completed') statusCell.setBackground('#dcfce7').setFontColor('#166534');
+  else if (cs === 'Queued' || cs === 'Retry Scheduled') statusCell.setBackground('#fef3c7').setFontColor('#92400e');
+  else if (cs === 'Manual Review') statusCell.setBackground('#fee2e2').setFontColor('#b91c1c');
   else if (cs === 'Campaign Error') statusCell.setBackground('#fee2e2').setFontColor('#dc2626');
   else statusCell.setBackground('#fef9c3').setFontColor('#92400e');
 }
@@ -717,7 +791,9 @@ function ensureHeaders_(sheet) {
     // Quick Action
     'WhatsApp Link',
     // Tracking
-    'Tracking No'
+    'Tracking No',
+    // Risk and Retry
+    'Fraud Score', 'Retry Count', 'Next Retry At', 'Last Error'
   ]];
   if (sheet.getLastRow() === 0) {
     sheet.getRange(1, 1, 1, headers[0].length).setValues(headers);
@@ -738,7 +814,7 @@ function applySheetDropdowns_(sheet) {
   // Col 22 = Campaign Status
   sheet.getRange(2, 22, lastRow, 1).setDataValidation(
     SpreadsheetApp.newDataValidation()
-      .requireValueInList(['Not Started', 'Launched', 'Completed', 'Campaign Error', 'Refunded'], true)
+      .requireValueInList(['Not Started', 'Queued', 'Launched', 'Retry Scheduled', 'Manual Review', 'Completed', 'Campaign Error', 'Refunded'], true)
       .setAllowInvalid(true).build());
 
   // Col 21 = Verification Status
@@ -764,7 +840,7 @@ function upsertOrderRow_(data) {
   const sheet = getOrdersSheet_();
   const existing = findOrderRow_(data.orderId);
   const amount = Number(data.amount) || 0;
-  const adBudget = Math.round(amount * AD_BUDGET_RATIO);
+  const adBudget = computeAdBudget_(amount);
   const razorpayFee = Math.round(amount * 0.02);
   const profit = amount - adBudget - razorpayFee;
   const row = [
@@ -778,7 +854,13 @@ function upsertOrderRow_(data) {
     data.campaignStatus, data.campaignId || '', data.campaignStart || '', data.campaignEnd || '',
     data.postViews || '', data.viewsGained || '', data.postFollowers || '', data.followersGained || '',
     data.confirmEmailSent || 'No', data.finalReportSent || 'No', data.whatsappNotified || 'No',
-    data.refundStatus || '', data.notes || ''
+    data.refundStatus || '', data.notes || '',
+    '',
+    data.trackingNo || '',
+    Number(data.fraudScore) || 0,
+    Number(data.retryCount) || 0,
+    data.nextRetryAt || '',
+    data.lastError || ''
   ];
   if (existing) {
     sheet.getRange(existing.rowNumber, 1, 1, row.length).setValues([row]);
@@ -788,7 +870,6 @@ function upsertOrderRow_(data) {
   sheet.appendRow(row);
   const newRow = sheet.getLastRow();
   addWhatsAppFormula_(sheet, newRow, data);
-  if (data.trackingNo) sheet.getRange(newRow, 36).setValue(data.trackingNo);
   return newRow;
 }
 
@@ -858,11 +939,57 @@ function updateStatusFromDashboard_(payload) {
   return { success: true };
 }
 
+function retryCampaignFromDashboard_(payload) {
+  if (!payload || !payload.orderId) throw new Error('Missing orderId.');
+  const row = findOrderRow_(payload.orderId);
+  if (!row) throw new Error('Order not found: ' + payload.orderId);
+  if (row.paymentStatus !== 'Paid') throw new Error('Sirf paid order retry ho sakta hai.');
+  const ready = validateCampaignReadiness_(row);
+  if (!ready.ok) {
+    setManualReviewState_(row.rowNumber, ready.message);
+    return { success: false, message: ready.message };
+  }
+  const config = getConfig_();
+  return tryLaunchCampaign_(row, config);
+}
+
 function updateCampaignStatus_(rowNumber, status, campaignId) {
   const sheet = getOrdersSheet_();
   sheet.getRange(rowNumber, 22).setValue(status);        // col 22 = Campaign Status
   sheet.getRange(rowNumber, 23).setValue(campaignId || ''); // col 23 = Campaign ID
   if (status === 'Launched') sheet.getRange(rowNumber, 24).setValue(new Date().toISOString()); // col 24 = Campaign Start
+}
+
+function scheduleCampaignRetry_(rowNumber, errorMessage) {
+  const sheet = getOrdersSheet_();
+  const currentRetryCount = Number(sheet.getRange(rowNumber, 38).getValue() || 0);
+  const nextRetryCount = currentRetryCount + 1;
+  const lastError = String(errorMessage || 'Campaign launch failed.');
+  sheet.getRange(rowNumber, 40).setValue(lastError);
+
+  if (nextRetryCount > MAX_AUTO_RETRIES) {
+    setManualReviewState_(rowNumber, lastError);
+    return { success: false, message: lastError, manualReview: true };
+  }
+
+  const nextRunAt = new Date(Date.now() + RETRY_DELAY_MINUTES * 60000).toISOString();
+  sheet.getRange(rowNumber, 38).setValue(nextRetryCount);
+  sheet.getRange(rowNumber, 39).setValue(nextRunAt);
+  updateCampaignStatus_(rowNumber, 'Retry Scheduled', '');
+  return { success: false, message: lastError, retryScheduled: true, retryCount: nextRetryCount };
+}
+
+function clearRetryMeta_(rowNumber) {
+  const sheet = getOrdersSheet_();
+  sheet.getRange(rowNumber, 38).setValue(0);
+  sheet.getRange(rowNumber, 39).setValue('');
+  sheet.getRange(rowNumber, 40).setValue('');
+}
+
+function setManualReviewState_(rowNumber, message) {
+  const sheet = getOrdersSheet_();
+  sheet.getRange(rowNumber, 40).setValue(String(message || 'Manual review required.'));
+  updateCampaignStatus_(rowNumber, 'Manual Review', '');
 }
 
 function updatePostCampaignData_(rowNumber, postViews, postFollowers) {
@@ -889,7 +1016,7 @@ function findOrderRow_(publicOrderId) {
   const sheet = getOrdersSheet_();
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) return null;
-  const values = sheet.getRange(2, 1, lastRow - 1, 36).getValues();
+  const values = sheet.getRange(2, 1, lastRow - 1, 40).getValues();
   for (var i = 0; i < values.length; i++) {
     if (values[i][0] !== publicOrderId) continue;
     return {
@@ -928,20 +1055,31 @@ function findOrderRow_(publicOrderId) {
       whatsappNotified: values[i][31],  // col 32
       refundStatus:     values[i][32],  // col 33
       notes:            values[i][33],  // col 34
-      trackingNo:       values[i][35]   // col 36
+      trackingNo:       values[i][35],  // col 36
+      fraudScore:       values[i][36],  // col 37
+      retryCount:       values[i][37],  // col 38
+      nextRetryAt:      values[i][38],  // col 39
+      lastError:        values[i][39]   // col 40
     };
   }
   return null;
 }
 
-function getOrderStatus_(trackingNo) {
+function getOrderStatus_(trackingNo, phoneLast4) {
   if (!trackingNo) return { success: false, message: 'Tracking number required.' };
+  if (!/^\d{5}$/.test(String(trackingNo).trim())) {
+    return { success: false, message: 'Track number 5 digit ka hona chahiye.' };
+  }
+  if (!/^\d{4}$/.test(String(phoneLast4).trim())) {
+    return { success: false, message: 'Mobile ke last 4 digit daaliye.' };
+  }
   const sheet = getOrdersSheet_();
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) return { success: false, message: 'Order not found.' };
-  const values = sheet.getRange(2, 1, lastRow - 1, 36).getValues();
+  const values = sheet.getRange(2, 1, lastRow - 1, 40).getValues();
   for (var i = 0; i < values.length; i++) {
     if (String(values[i][35]).trim() !== String(trackingNo).trim()) continue;
+    if (getPhoneLast4_(values[i][15]) !== String(phoneLast4).trim()) continue;
     const cs = String(values[i][21] || 'Not Started');
     return {
       success: true,
@@ -961,11 +1099,13 @@ function getOrderStatus_(trackingNo) {
       campaignEnd:    values[i][24]
     };
   }
-  return { success: false, message: 'Tracking number nahi mila. Sahi number check karo.' };
+  return { success: false, message: 'Tracking number ya mobile last 4 digit galat hain.' };
 }
 
 function updateTracking_(payload) {
   if (!payload || !payload.orderId || !payload.trackingNo) throw new Error('Missing orderId or trackingNo.');
+  if (!/^\d{5}$/.test(String(payload.trackingNo).trim())) throw new Error('Track number 5 digit ka hona chahiye.');
+  if (trackingNoExists_(String(payload.trackingNo).trim(), payload.orderId)) throw new Error('Yeh tracking number pehle se use ho raha hai.');
   const row = findOrderRow_(payload.orderId);
   if (!row) throw new Error('Order not found.');
   const sheet = getOrdersSheet_();
@@ -1160,7 +1300,13 @@ function parseJsonBody_(e) {
 function validateOrderPayload_(payload) {
   if (!payload) throw new Error('Missing request body.');
   if (!payload.amount || Number(payload.amount) <= 0) throw new Error('Invalid amount.');
+  if (!payload.platform) throw new Error('Missing platform.');
+  if (!payload.objective) throw new Error('Missing objective.');
   if (!payload.link) throw new Error('Missing link.');
+  if (!payload.phone) throw new Error('Missing phone.');
+  if (!validateLinkForPlatform_(payload.link, payload.platform, payload.objective)) {
+    throw new Error('Selected service ke liye link valid nahi hai.');
+  }
 }
 
 function validateVerificationPayload_(payload) {
@@ -1175,4 +1321,126 @@ function jsonResponse_(payload) {
 
 function escapeHtml_(value) {
   return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function computeAdBudget_(amount) {
+  const intAmount = Number(amount) || 0;
+  return PLAN_BUDGET_CAPS[intAmount] || Math.round(intAmount * AD_BUDGET_RATIO);
+}
+
+function generateUniqueTrackingNo_() {
+  for (var i = 0; i < 25; i++) {
+    const trackingNo = String(Math.floor(10000 + Math.random() * 90000));
+    if (!trackingNoExists_(trackingNo)) return trackingNo;
+  }
+  throw new Error('Unique tracking number generate nahi ho paya. Dobara try karein.');
+}
+
+function trackingNoExists_(trackingNo, excludeOrderId) {
+  const sheet = getOrdersSheet_();
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return false;
+  const values = sheet.getRange(2, 1, lastRow - 1, 36).getValues();
+  for (var i = 0; i < values.length; i++) {
+    if (excludeOrderId && values[i][0] === excludeOrderId) continue;
+    if (String(values[i][35]).trim() === String(trackingNo).trim()) return true;
+  }
+  return false;
+}
+
+function validateLinkForPlatform_(link, platform, objective) {
+  try {
+    const parsed = new URL(link);
+    const host = parsed.hostname.toLowerCase();
+    const path = parsed.pathname.toLowerCase();
+
+    if (platform === 'youtube') {
+      if (!(host.includes('youtube.com') || host.includes('youtu.be'))) return false;
+      if (objective === 'shorts') return path.indexOf('/shorts/') !== -1 || host.includes('youtu.be');
+      return path.indexOf('/watch') !== -1 || host.includes('youtu.be');
+    }
+
+    if (platform === 'instagram') {
+      return host.includes('instagram.com') && path.indexOf('/reel/') !== -1;
+    }
+
+    if (platform === 'facebook') {
+      if (!(host.includes('facebook.com') || host.includes('fb.watch') || host.includes('fb.com'))) return false;
+      if (objective === 'reels') return path.indexOf('/reel/') !== -1;
+      return path.indexOf('/video') !== -1 || host.includes('fb.watch');
+    }
+
+    return false;
+  } catch (e) {
+    return false;
+  }
+}
+
+function validateCampaignReadiness_(row) {
+  if (!row || !row.link) return { ok: false, message: 'Link missing hai.' };
+  if (!validateLinkForPlatform_(row.link, row.platform, row.service)) {
+    return { ok: false, message: 'Link selected service se match nahi karta.' };
+  }
+  if (row.platform === 'youtube' && !extractYouTubeVideoId_(row.link)) {
+    return { ok: false, message: 'YouTube video ID nahi mili.' };
+  }
+  return { ok: true };
+}
+
+function assessFraudRisk_(payload) {
+  const result = { score: 0, reason: '', blocked: false, message: '' };
+  const sheet = getOrdersSheet_();
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return result;
+
+  const values = sheet.getRange(2, 1, lastRow - 1, 40).getValues();
+  const phone = normalizePhoneDigits_(payload.phone);
+  const link = String(payload.link || '').trim().toLowerCase();
+  const now = Date.now();
+  let samePhoneRecent = 0;
+  let sameLinkRecent = 0;
+
+  for (var i = 0; i < values.length; i++) {
+    const existingPhone = normalizePhoneDigits_(values[i][15]);
+    const existingLink = String(values[i][16] || '').trim().toLowerCase();
+    const createdAt = new Date(values[i][4]).getTime();
+    if (!createdAt || isNaN(createdAt)) continue;
+    const ageHours = (now - createdAt) / 3600000;
+
+    if (existingPhone === phone && existingLink === link && ageHours <= EXACT_DUPLICATE_WINDOW_HOURS) {
+      result.blocked = true;
+      result.score = 90;
+      result.reason = 'Exact duplicate recent order';
+      result.message = 'Same phone aur same link ka order pehle se bana hua hai.';
+      return result;
+    }
+
+    if (existingPhone === phone && ageHours <= 1) samePhoneRecent++;
+    if (existingLink && existingLink === link && ageHours <= 24) sameLinkRecent++;
+  }
+
+  if (samePhoneRecent >= 2) {
+    result.score += 25;
+    result.reason = 'Same phone recent orders';
+  }
+  if (sameLinkRecent >= 2) {
+    result.score += 25;
+    result.reason = [result.reason, 'Same link repeated'].filter(Boolean).join(' | ');
+  }
+  if (!validateLinkForPlatform_(payload.link, payload.platform, payload.objective)) {
+    result.score += 40;
+    result.reason = [result.reason, 'Invalid link'].filter(Boolean).join(' | ');
+  }
+
+  return result;
+}
+
+function normalizePhoneDigits_(value) {
+  const digits = String(value || '').replace(/\D/g, '');
+  return digits.length > 10 ? digits.slice(-10) : digits;
+}
+
+function getPhoneLast4_(value) {
+  const digits = normalizePhoneDigits_(value);
+  return digits.slice(-4);
 }

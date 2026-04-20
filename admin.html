@@ -64,6 +64,7 @@
     .status-select.s-pending{border-color:#fcd34d;color:#92400e;background:#fffbeb}
     .status-select.s-launched{border-color:#93c5fd;color:#1d4ed8;background:#eff6ff}
     .status-select.s-completed{border-color:#86efac;color:#166534;background:#f0fdf4}
+    .status-select.s-review{border-color:#fca5a5;color:#b91c1c;background:#fef2f2}
 
     /* BUTTONS */
     .btn-wa{display:inline-flex;align-items:center;gap:5px;padding:7px 11px;background:#22c55e;color:#fff;border:none;border-radius:8px;font-size:0.78rem;font-weight:700;cursor:pointer;text-decoration:none;font-family:inherit;transition:background 0.15s}
@@ -76,11 +77,14 @@
     .btn-save-track:hover{background:#ea580c}
     .btn-mail{display:inline-flex;align-items:center;gap:5px;padding:7px 11px;background:#6366f1;color:#fff;border:none;border-radius:8px;font-size:0.78rem;font-weight:700;cursor:pointer;text-decoration:none;font-family:inherit;transition:background 0.15s;margin-top:5px}
     .btn-mail:hover{background:#4f46e5}
+    .btn-retry{display:inline-flex;align-items:center;gap:5px;padding:7px 11px;background:#f97316;color:#fff;border:none;border-radius:8px;font-size:0.78rem;font-weight:700;cursor:pointer;text-decoration:none;font-family:inherit;transition:background 0.15s;margin-top:5px}
+    .btn-retry:hover{background:#ea580c}
     .action-col{display:flex;flex-direction:column;gap:0}
     .video-link{display:inline-block;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#6366f1;font-size:0.78rem;font-weight:600;text-decoration:none;vertical-align:middle}
     .video-link:hover{text-decoration:underline}
     .no-link{color:#cbd5e1;font-size:0.78rem}
     .service-tag{display:inline-block;background:#f1f5f9;color:#475569;padding:2px 7px;border-radius:5px;font-size:0.73rem;font-weight:600;margin-top:3px}
+    .risk-tag{display:inline-block;background:#fff7ed;color:#c2410c;padding:2px 7px;border-radius:999px;font-size:0.72rem;font-weight:700;margin-top:6px}
 
     /* EMPTY */
     .empty-state{text-align:center;padding:60px 24px;color:#94a3b8}
@@ -244,16 +248,19 @@ function renderTable() {
     <tbody>
       ${rows.map((o,i) => {
         const phone = String(o.phone||'').replace(/\D/g,'');
-        const statusLabel = o.campaignStatus === 'Launched' ? '🚀 Campaign LIVE hai!' : o.campaignStatus === 'Completed' ? '✅ Campaign Complete ho gaya!' : '⏳ Campaign jald shuru hoga';
+        const statusLabel = o.campaignStatus === 'Launched' ? '🚀 Campaign LIVE hai!' : o.campaignStatus === 'Completed' ? '✅ Campaign Complete ho gaya!' : o.campaignStatus === 'Retry Scheduled' ? '🔄 Campaign retry me hai' : o.campaignStatus === 'Manual Review' ? '👀 Manual review me hai' : '⏳ Campaign jald shuru hoga';
         const waMsg = encodeURIComponent('Namaskar ' + (o.name||'') + '! Aapka BoostKaro Order update:\n\n📦 Track No: ' + (o.trackingNo||o.orderId) + '\n📊 Status: ' + statusLabel + '\n\nStatus check karo: https://boostkaro.dataimpact.in/status.html?track=' + (o.trackingNo||'') + '\n\nKoi sawaal ho to batayein. 🙏');
         const waLink = 'https://wa.me/' + (phone.startsWith('91') ? phone : '91'+phone) + '?text=' + waMsg;
-        const sc = o.campaignStatus === 'Launched' ? 's-launched' : o.campaignStatus === 'Completed' ? 's-completed' : 's-pending';
+        const sc = o.campaignStatus === 'Launched' ? 's-launched' : o.campaignStatus === 'Completed' ? 's-completed' : (o.campaignStatus === 'Manual Review' || o.campaignStatus === 'Campaign Error') ? 's-review' : 's-pending';
         const videoLink = o.userLink || o.link || '';
         const linkDisplay = videoLink ? videoLink.replace(/https?:\/\/(www\.)?/,'').slice(0,30) + (videoLink.length > 35 ? '…' : '') : '';
         const service = o.service || o.objective || '';
         const mailSubject = encodeURIComponent('BoostKaro — Order #' + o.orderId + ' Update');
         const mailBody = encodeURIComponent('Namaskar ' + (o.name||'') + ',\n\nAapka order update hai.\n\nOrder ID: ' + o.orderId + '\n\nBoostKaro Team');
         const hasEmail = o.email && o.email !== '-' && String(o.email).includes('@');
+        const retryInfo = Number(o.retryCount || 0) > 0 ? `<div class="risk-tag">Retry ${o.retryCount}${o.lastError ? ' · ' + String(o.lastError).slice(0,22) : ''}</div>` : '';
+        const fraudInfo = Number(o.fraudScore || 0) > 0 ? `<div class="risk-tag">Risk ${o.fraudScore}</div>` : '';
+        const canRetry = ['Campaign Error','Retry Scheduled','Manual Review','Queued'].includes(o.campaignStatus);
         return `<tr>
           <td>
             <div class="track-cell" id="tc-${o.orderId}">
@@ -275,17 +282,23 @@ function renderTable() {
           <td>
             <div class="amount">₹${Number(o.amount||0).toLocaleString('en-IN')} <span style="font-size:0.7rem;color:#94a3b8">paid</span></div>
             <div class="ad-budget">Ad: ₹${Number(o.adBudget||0).toLocaleString('en-IN')} · ${o.plan||''}</div>
+            ${fraudInfo}
+            ${retryInfo}
           </td>
           <td>
             <select class="status-select ${sc}" onchange="onStatusChange('${o.orderId}', this)">
               <option ${o.campaignStatus==='Not Started'?'selected':''}>Not Started</option>
+              <option ${o.campaignStatus==='Queued'?'selected':''}>Queued</option>
               <option ${o.campaignStatus==='Launched'?'selected':''}>Launched</option>
+              <option ${o.campaignStatus==='Retry Scheduled'?'selected':''}>Retry Scheduled</option>
+              <option ${o.campaignStatus==='Manual Review'?'selected':''}>Manual Review</option>
               <option ${o.campaignStatus==='Completed'?'selected':''}>Completed</option>
               <option ${o.campaignStatus==='Campaign Error'?'selected':''}>Campaign Error</option>
             </select>
           </td>
           <td>
             ${hasEmail ? `<a href="mailto:${o.email}?subject=${mailSubject}&body=${mailBody}" class="btn-mail">✉️ Mail</a>` : '<span style="color:#cbd5e1;font-size:0.78rem">No email</span>'}
+            ${canRetry ? `<button class="btn-retry" onclick="retryCampaign('${o.orderId}')">🔄 Retry</button>` : ''}
           </td>
         </tr>`;
       }).join('')}
@@ -296,7 +309,7 @@ function renderTable() {
 
 function onStatusChange(orderId, sel) {
   const status = sel.value;
-  sel.className = 'status-select ' + (status==='Launched'?'s-launched':status==='Completed'?'s-completed':'s-pending');
+  sel.className = 'status-select ' + (status==='Launched' ? 's-launched' : status==='Completed' ? 's-completed' : (status==='Manual Review' || status==='Campaign Error') ? 's-review' : 's-pending');
   if (status === 'Completed') {
     completingId = orderId;
     document.getElementById('postViews').value = '';
@@ -324,7 +337,7 @@ function editTracking(orderId, current) {
   const cell = document.getElementById('tc-' + orderId);
   if (!cell) return;
   cell.innerHTML = `
-    <input class="track-input-inline" id="ti-${orderId}" value="${current}" maxlength="6" inputmode="numeric"
+    <input class="track-input-inline" id="ti-${orderId}" value="${current}" maxlength="5" inputmode="numeric"
       onkeydown="if(event.key==='Enter')saveTracking('${orderId}')" />
     <button class="btn-save-track" onclick="saveTracking('${orderId}')">✓</button>`;
   document.getElementById('ti-' + orderId).focus();
@@ -348,6 +361,21 @@ async function saveTracking(orderId) {
     const cell = document.getElementById('tc-' + orderId);
     if (cell) cell.innerHTML = `<span class="track-no" title="Click to edit" onclick="editTracking('${orderId}','${val}')">${val}</span>`;
   } catch(e) { alert('Error: ' + e.message); }
+}
+
+async function retryCampaign(orderId) {
+  try {
+    const res = await fetch(GAS_URL + '?action=retryCampaign', {
+      method: 'POST', headers: {'Content-Type':'text/plain'},
+      body: JSON.stringify({ orderId }), redirect: 'follow'
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message);
+    await loadOrders();
+  } catch(e) {
+    alert('Retry error: ' + e.message);
+    loadOrders();
+  }
 }
 
 function closeModal() {

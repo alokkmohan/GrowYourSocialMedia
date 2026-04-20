@@ -155,9 +155,13 @@
       document.getElementById('trackNum').textContent = trackingNo !== '-' ? trackingNo : '——';
       document.getElementById('trackNumSmall').textContent = trackingNo !== '-' ? trackingNo : '';
 
+      const phoneLast4 = String(phone || '').replace(/\D/g, '').slice(-4);
+
       // Status link
       if (trackingNo && trackingNo !== '-') {
-        document.getElementById('statusLink').href = 'status.html?track=' + encodeURIComponent(trackingNo);
+        let href = 'status.html?track=' + encodeURIComponent(trackingNo);
+        if (phoneLast4) href += '&p4=' + encodeURIComponent(phoneLast4);
+        document.getElementById('statusLink').href = href;
       }
 
       // Order rows
@@ -170,14 +174,18 @@
         ['Payment ID', paymentId],
         ['Email', email],
         ['WhatsApp', phone],
+        ['Status Verify', phoneLast4 ? 'Track number + mobile ke last 4 digit' : 'Track number'],
       ];
       document.getElementById('orderDetails').innerHTML = rows.map(function(r) {
         return '<div class="order-row"><span>' + r[0] + '</span><span>' + r[1] + '</span></div>';
       }).join('');
 
       // WhatsApp message
-      const waMsg = encodeURIComponent('Namaskar! Mera Track Number hai: ' + trackingNo + ' — Order ID: ' + orderId + ' — kripya campaign status batayein. 🙏');
-      document.getElementById('waBtn').href = 'https://wa.me/919236569072?text=' + waMsg;
+      const waBtn = document.getElementById('waBtn');
+      if (waBtn) {
+        const waMsg = encodeURIComponent('Namaskar! Mera Track Number hai: ' + trackingNo + ' — Order ID: ' + orderId + ' — kripya campaign status batayein. 🙏');
+        waBtn.href = 'https://wa.me/919236569072?text=' + waMsg;
+      }
     })();
 
     function downloadReceipt() {

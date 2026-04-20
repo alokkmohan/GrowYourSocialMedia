@@ -2,7 +2,7 @@
 // BoostKaro - Main JS
 // =============================================
 
-const RAZORPAY_KEY = 'rzp_test_SfhusOo0f9Pt37';
+const RAZORPAY_KEY = 'rzp_live_SfEnPdfoYwU0WJ';
 const PAYMENT_API_URL = 'https://script.google.com/macros/s/AKfycbxeB6DMx4aEQzBwHrTVLavowHYLarTIXoOLJxI9aVr5cnXyj3W0qWlRRk7QJJtQ4p8K/exec';
 const GAS_WEBHOOK_URL = '';
 
@@ -554,10 +554,22 @@ function isValidEmail(str) {
 
 function isExpectedLinkForSelection(link) {
   try {
-    const host = new URL(link).hostname.toLowerCase();
-    if (order.platform === 'facebook')  return host.includes('facebook.com') || host.includes('fb.watch') || host.includes('fb.com');
-    if (order.platform === 'instagram') return host.includes('instagram.com');
-    if (order.platform === 'youtube')   return host.includes('youtube.com') || host.includes('youtu.be');
+    const parsed = new URL(link);
+    const host = parsed.hostname.toLowerCase();
+    const path = parsed.pathname.toLowerCase();
+    if (order.platform === 'facebook') {
+      if (!(host.includes('facebook.com') || host.includes('fb.watch') || host.includes('fb.com'))) return false;
+      if (order.objective === 'reels') return path.includes('/reel/');
+      return path.includes('/video') || host.includes('fb.watch');
+    }
+    if (order.platform === 'instagram') {
+      return host.includes('instagram.com') && path.includes('/reel/');
+    }
+    if (order.platform === 'youtube') {
+      if (!(host.includes('youtube.com') || host.includes('youtu.be'))) return false;
+      if (order.objective === 'shorts') return path.includes('/shorts/') || host.includes('youtu.be');
+      return path.includes('/watch') || host.includes('youtu.be');
+    }
     return true;
   } catch (e) {
     return false;

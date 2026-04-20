@@ -3,73 +3,78 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Order Status — BoostKaro</title>
+  <title>Order Status - BoostKaro</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Inter', sans-serif; background: #fff9f5; min-height: 100vh; padding: 24px 16px; }
     .logo { display: inline-block; font-size: 1.4rem; font-weight: 800; color: #f97316; text-decoration: none; margin-bottom: 20px; }
-
-    /* SEARCH BOX */
-    .search-card {
+    .search-card, .result-card {
       background: #fff;
       border-radius: 20px;
       border: 1.5px solid #ffe8d6;
       padding: 28px 24px;
-      max-width: 480px;
+      max-width: 520px;
       margin: 0 auto 20px;
       box-shadow: 0 4px 20px rgba(249,115,22,0.07);
     }
     .search-card h2 { font-size: 1.25rem; color: #1a0a00; margin-bottom: 6px; }
     .search-card p { color: #a8784a; font-size: 0.9rem; margin-bottom: 20px; }
-    .input-wrap { display: flex; gap: 10px; }
-    .track-input {
-      flex: 1; padding: 13px 16px;
-      border: 2px solid #ffe8d6; border-radius: 12px;
-      font-size: 1.2rem; font-weight: 700; letter-spacing: 0.1em;
-      color: #1a0a00; font-family: inherit; outline: none;
+    .input-wrap { display: grid; grid-template-columns: minmax(0, 1fr) 120px auto; gap: 10px; }
+    .track-input, .phone4-input {
+      padding: 13px 16px;
+      border: 2px solid #ffe8d6;
+      border-radius: 12px;
+      color: #1a0a00;
+      font-family: inherit;
+      outline: none;
       text-align: center;
+      font-weight: 700;
     }
-    .track-input:focus { border-color: #f97316; }
+    .track-input { font-size: 1.1rem; letter-spacing: 0.12em; }
+    .phone4-input { font-size: 1rem; letter-spacing: 0.18em; }
+    .track-input:focus, .phone4-input:focus { border-color: #f97316; }
     .btn-search {
-      padding: 13px 20px; background: linear-gradient(135deg, #f97316, #ec4899);
-      color: #fff; border: none; border-radius: 12px;
-      font-weight: 700; font-size: 1rem; cursor: pointer; font-family: inherit;
+      padding: 13px 20px;
+      background: linear-gradient(135deg, #f97316, #ec4899);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      font-family: inherit;
       white-space: nowrap;
     }
-    .btn-search:hover { opacity: 0.9; }
     .error-msg { color: #dc2626; font-size: 0.88rem; margin-top: 10px; display: none; }
-
-    /* RESULT CARD */
-    .result-card {
-      background: #fff;
-      border-radius: 20px;
-      border: 1.5px solid #ffe8d6;
-      padding: 28px 24px;
-      max-width: 480px;
-      margin: 0 auto;
-      box-shadow: 0 4px 20px rgba(249,115,22,0.07);
-      display: none;
-    }
-
-    /* Track number display */
+    .result-card { display: none; }
     .track-header {
-      display: flex; align-items: center; justify-content: space-between;
-      background: #fff9f5; border: 1.5px solid #ffe8d6;
-      border-radius: 12px; padding: 12px 16px; margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #fff9f5;
+      border: 1.5px solid #ffe8d6;
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      gap: 12px;
     }
     .track-header .label { font-size: 0.78rem; color: #a8784a; font-weight: 600; text-transform: uppercase; }
     .track-header .num { font-size: 1.6rem; font-weight: 800; color: #f97316; letter-spacing: 0.1em; }
     .track-header .cust { font-size: 0.85rem; color: #64748b; margin-top: 2px; }
-
-    /* Status steps */
     .steps { display: flex; flex-direction: column; gap: 0; margin: 20px 0; }
     .step { display: flex; gap: 14px; }
     .step-left { display: flex; flex-direction: column; align-items: center; }
     .step-dot {
-      width: 40px; height: 40px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.1rem; flex-shrink: 0; font-weight: 700;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 700;
+      flex-shrink: 0;
     }
     .step-dot.done { background: #dcfce7; border: 2px solid #16a34a; }
     .step-dot.active { background: linear-gradient(135deg, #f97316, #ec4899); color: #fff; }
@@ -81,141 +86,176 @@
     .step-content h4 { font-size: 0.95rem; font-weight: 700; color: #1a0a00; margin-bottom: 3px; }
     .step-content p { font-size: 0.83rem; color: #64748b; line-height: 1.5; }
     .step-badge {
-      display: inline-block; margin-top: 5px; padding: 3px 10px;
-      border-radius: 999px; font-size: 0.75rem; font-weight: 700;
+      display: inline-block;
+      margin-top: 5px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
     }
     .badge-done { background: #dcfce7; color: #166534; }
     .badge-active { background: #fef3c7; color: #92400e; }
     .badge-pending { background: #f1f5f9; color: #94a3b8; }
     .badge-error { background: #fee2e2; color: #dc2626; }
-
-    /* Result info box */
     .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0; }
     .info-cell { background: #f8fafc; border-radius: 10px; padding: 12px; }
     .info-cell .lbl { font-size: 0.72rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; margin-bottom: 4px; }
     .info-cell .val { font-size: 1rem; font-weight: 700; color: #1e293b; }
     .info-cell.highlight { background: #fff0e8; }
-    .info-cell.highlight .val { color: #f97316; }
     .views-gained { font-size: 1.4rem; color: #16a34a; font-weight: 800; }
-
-    /* Buttons */
-    .btn-wa { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 14px; background: #22c55e; color: #fff; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 1rem; margin-top: 16px; }
-    .btn-wa:hover { background: #16a34a; }
-    .btn-home { display: flex; align-items: center; justify-content: center; width: 100%; padding: 12px; background: #f1f5f9; color: #64748b; border-radius: 12px; text-decoration: none; font-weight: 700; margin-top: 8px; font-size: 0.92rem; }
-
-    /* Loading */
+    .btn-home {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 12px;
+      background: #f1f5f9;
+      color: #64748b;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 700;
+      margin-top: 8px;
+      font-size: 0.92rem;
+    }
     .loading { text-align: center; padding: 24px; color: #94a3b8; display: none; }
-    .spinner { display: inline-block; width: 28px; height: 28px; border: 3px solid #ffe8d6; border-top-color: #f97316; border-radius: 50%; animation: spin 0.7s linear infinite; }
+    .spinner {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      border: 3px solid #ffe8d6;
+      border-top-color: #f97316;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 560px) {
+      .input-wrap { grid-template-columns: 1fr 110px; }
+      .btn-search { grid-column: 1 / -1; }
+      .track-header { flex-direction: column; align-items: flex-start; }
+      .info-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
-  <div style="max-width:480px;margin:0 auto;">
-    <a href="index.html" class="logo">⚡ BoostKaro</a>
+  <div style="max-width:520px;margin:0 auto;">
+    <a href="index.html" class="logo">BoostKaro</a>
 
-    <!-- Search -->
     <div class="search-card">
-      <h2>🔍 Order Status Check Karo</h2>
-      <p>Apna 5-digit Track Number daalo jo order ke baad mila tha</p>
+      <h2>Order Status Check Karo</h2>
+      <p>Apna 5-digit track number aur mobile ke last 4 digit daalo.</p>
       <div class="input-wrap">
-        <input type="number" class="track-input" id="trackInput" placeholder="Jaise: 74821" maxlength="5" inputmode="numeric" />
-        <button class="btn-search" onclick="checkStatus()">Check →</button>
+        <input type="number" class="track-input" id="trackInput" placeholder="74821" inputmode="numeric" />
+        <input type="number" class="phone4-input" id="phone4Input" placeholder="Last 4" inputmode="numeric" />
+        <button class="btn-search" onclick="checkStatus()">Check</button>
       </div>
       <div class="error-msg" id="errorMsg"></div>
     </div>
 
-    <!-- Loading -->
     <div class="loading" id="loading">
       <div class="spinner"></div>
       <p style="margin-top:10px;font-size:0.9rem;">Check ho raha hai...</p>
     </div>
 
-    <!-- Result -->
-    <div class="result-card" id="resultCard">
-      <!-- filled by JS -->
-    </div>
+    <div class="result-card" id="resultCard"></div>
   </div>
 
   <script>
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbxeB6DMx4aEQzBwHrTVLavowHYLarTIXoOLJxI9aVr5cnXyj3W0qWlRRk7QJJtQ4p8K/exec';
 
-    // Auto-fill from URL param
-    (function() {
+    (function () {
       const p = new URLSearchParams(window.location.search);
-      const t = p.get('track');
-      if (t) {
-        document.getElementById('trackInput').value = t;
-        setTimeout(checkStatus, 300);
-      }
+      const track = p.get('track');
+      const p4 = p.get('p4');
+      if (track) document.getElementById('trackInput').value = track;
+      if (p4) document.getElementById('phone4Input').value = p4;
+      if (track && p4) setTimeout(checkStatus, 300);
     })();
 
-    document.getElementById('trackInput').addEventListener('keydown', function(e) {
+    document.getElementById('trackInput').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') checkStatus();
+    });
+    document.getElementById('phone4Input').addEventListener('keydown', function (e) {
       if (e.key === 'Enter') checkStatus();
     });
 
     async function checkStatus() {
       const trackNo = document.getElementById('trackInput').value.trim();
-      if (!trackNo || trackNo.length < 4) {
+      const phoneLast4 = document.getElementById('phone4Input').value.trim();
+
+      if (!/^\d{5}$/.test(trackNo)) {
         showError('Sahi track number daalo (5 digit)');
         return;
       }
+      if (!/^\d{4}$/.test(phoneLast4)) {
+        showError('Mobile ke last 4 digit daalo');
+        return;
+      }
+
       hideError();
       showLoading(true);
       document.getElementById('resultCard').style.display = 'none';
 
       try {
-        const res = await fetch(GAS_URL + '?action=getStatus&trackingNo=' + encodeURIComponent(trackNo), { redirect: 'follow' });
+        const res = await fetch(GAS_URL + '?action=getStatus&trackingNo=' + encodeURIComponent(trackNo) + '&phoneLast4=' + encodeURIComponent(phoneLast4), { redirect: 'follow' });
         const data = await res.json();
         showLoading(false);
-        if (!data.success) { showError(data.message || 'Order nahi mila.'); return; }
+        if (!data.success) {
+          showError(data.message || 'Order nahi mila.');
+          return;
+        }
         renderResult(data);
-      } catch(e) {
+      } catch (error) {
         showLoading(false);
-        showError('Network error — dobara try karo.');
+        showError('Network error - dobara try karo.');
       }
     }
 
     function renderResult(d) {
       const cs = d.campaignStatus || 'Not Started';
-      const isPaid     = d.paymentStatus === 'Paid' || d.paymentStatus === 'Verified';
       const isLaunched = cs === 'Launched';
-      const isDone     = cs === 'Completed';
-      const isError    = cs && cs.includes('Error');
+      const isDone = cs === 'Completed';
+      const isError = cs.indexOf('Error') !== -1 || cs === 'Campaign Error';
+      const isQueued = cs === 'Queued' || cs === 'Retry Scheduled';
+      const isReview = cs === 'Manual Review';
 
       const platform = d.platform ? d.platform.charAt(0).toUpperCase() + d.platform.slice(1) : '-';
-      const amount = d.amount ? '₹' + Number(d.amount).toLocaleString('en-IN') : '-';
+      const amount = d.amount ? 'Rs ' + Number(d.amount).toLocaleString('en-IN') : '-';
       const name = d.name ? d.name.split(' ')[0] : 'Aap';
 
-      // Step states
-      const s1 = 'done';
-      const s2 = isDone ? 'done' : isLaunched ? 'active' : isError ? 'active' : 'pending';
-      const s3 = isDone ? 'done' : 'pending';
+      const step2Label = isReview ? 'Manual Review' : isError ? 'Campaign Error' : isLaunched ? 'Campaign Live' : isQueued ? 'Queue / Retry' : 'Processing';
+      const step2Badge = isReview
+        ? '<span class="step-badge badge-error">Review</span>'
+        : isError
+          ? '<span class="step-badge badge-error">Error</span>'
+          : isLaunched
+            ? '<span class="step-badge badge-active">Live</span>'
+            : isQueued
+              ? '<span class="step-badge badge-active">Retry Scheduled</span>'
+              : '<span class="step-badge badge-pending">Pending</span>';
 
-      const step2Label = isError ? 'Campaign Error' : isLaunched ? 'Campaign Live!' : 'Processing...';
-      const step2Badge = isError
-        ? '<span class="step-badge badge-error">⚠️ Error</span>'
-        : isLaunched
-          ? '<span class="step-badge badge-active">🚀 Live Hai!</span>'
-          : '<span class="step-badge badge-pending">⏳ Jald Shuru Hoga</span>';
+      const step2Text = isLaunched || isDone
+        ? 'Aapka ad campaign Meta/Google Ads par live hai.'
+        : isReview
+          ? 'Order ko safety check ke liye manual review me rakha gaya hai.'
+          : isError
+            ? 'Campaign launch me problem aayi hai. Team retry ya review karegi.'
+            : isQueued
+              ? 'Campaign queue ya retry me hai. Thodi der me dobara launch hoga.'
+              : 'Aapka campaign jald live hoga.';
 
-      const step3Content = isDone
-        ? `<p>Campaign complete! ${d.viewsGained ? '<strong>+' + Number(d.viewsGained).toLocaleString('en-IN') + ' Views Mila 🎉</strong>' : 'Views aa gaye!'}</p><span class="step-badge badge-done">✅ Complete</span>`
-        : '<p>Campaign khatam hone par yahan views ka result dikhega</p><span class="step-badge badge-pending">Upcoming</span>';
-
-      let viewsHTML = '';
-      if (isDone && (d.preViews || d.postViews || d.viewsGained)) {
-        viewsHTML = `
-        <div class="info-grid">
-          <div class="info-cell"><div class="lbl">Views Pehle</div><div class="val">${Number(d.preViews||0).toLocaleString('en-IN')}</div></div>
-          <div class="info-cell"><div class="lbl">Views Baad</div><div class="val">${Number(d.postViews||0).toLocaleString('en-IN')}</div></div>
-          <div class="info-cell highlight" style="grid-column:1/-1;text-align:center;">
-            <div class="lbl">Kul Views Mila</div>
-            <div class="views-gained">+${Number(d.viewsGained||0).toLocaleString('en-IN')} 🎉</div>
+      const viewsHTML = isDone
+        ? `
+          <div class="info-grid">
+            <div class="info-cell"><div class="lbl">Views Pehle</div><div class="val">${Number(d.preViews || 0).toLocaleString('en-IN')}</div></div>
+            <div class="info-cell"><div class="lbl">Views Baad</div><div class="val">${Number(d.postViews || 0).toLocaleString('en-IN')}</div></div>
+            <div class="info-cell highlight" style="grid-column:1/-1;text-align:center;">
+              <div class="lbl">Kul Views Mila</div>
+              <div class="views-gained">+${Number(d.viewsGained || 0).toLocaleString('en-IN')}</div>
+            </div>
           </div>
-        </div>`;
-      }
-
-      const waMsg = encodeURIComponent('Namaskar! Mera Track Number ' + d.trackingNo + ' hai — aur status poochhna tha. 🙏');
+        `
+        : '';
 
       document.getElementById('resultCard').innerHTML = `
         <div class="track-header">
@@ -233,26 +273,28 @@
 
         <div class="steps">
           <div class="step">
-            <div class="step-left"><div class="step-dot done">✅</div><div class="step-line done"></div></div>
+            <div class="step-left"><div class="step-dot done">OK</div><div class="step-line done"></div></div>
             <div class="step-content">
               <h4>Payment Confirm Ho Gaya</h4>
-              <p>Amount: ${amount} — Razorpay se secure payment</p>
-              <span class="step-badge badge-done">Ho Gaya ✓</span>
+              <p>Amount: ${amount}</p>
+              <span class="step-badge badge-done">Confirmed</span>
             </div>
           </div>
           <div class="step">
-            <div class="step-left"><div class="step-dot ${s2}">${isDone ? '✅' : isLaunched ? '🚀' : isError ? '⚠️' : '⏳'}</div><div class="step-line ${isDone?'done':'pending'}"></div></div>
+            <div class="step-left"><div class="step-dot ${(isLaunched || isDone || isError || isQueued || isReview) ? 'active' : 'pending'}">${isDone ? 'OK' : isLaunched ? 'GO' : isReview ? 'RV' : isError ? 'ER' : isQueued ? 'RT' : '...'}</div><div class="step-line ${isDone ? 'done' : 'pending'}"></div></div>
             <div class="step-content">
-              <h4>Ad Campaign — ${step2Label}</h4>
-              <p>${isLaunched||isDone ? 'Aapka ad campaign Meta/Google Ads par live hai' : isError ? 'Campaign mein koi problem — team jald theek karegi' : 'Aapka campaign jald live hoga — 5 minute ke andar'}</p>
+              <h4>Ad Campaign - ${step2Label}</h4>
+              <p>${step2Text}</p>
               ${step2Badge}
             </div>
           </div>
           <div class="step">
-            <div class="step-left"><div class="step-dot ${s3}">${isDone ? '🎉' : '📊'}</div></div>
+            <div class="step-left"><div class="step-dot ${isDone ? 'done' : 'pending'}">${isDone ? 'OK' : 'RP'}</div></div>
             <div class="step-content">
               <h4>Final Report</h4>
-              ${step3Content}
+              ${isDone
+                ? '<p>Campaign complete ho gaya. Result neeche dikh raha hai.</p><span class="step-badge badge-done">Complete</span>'
+                : '<p>Campaign khatam hone par yahan result dikhega.</p><span class="step-badge badge-pending">Upcoming</span>'}
             </div>
           </div>
         </div>
@@ -260,23 +302,30 @@
         ${viewsHTML}
 
         <div style="background:#f8fafc;border-radius:12px;padding:14px;font-size:0.85rem;color:#64748b;line-height:1.6;margin-top:4px;">
-          <strong style="display:block;color:#1e293b;margin-bottom:4px;">📦 Plan: ${d.plan || '-'}</strong>
+          <strong style="display:block;color:#1e293b;margin-bottom:4px;">Plan: ${d.plan || '-'}</strong>
           Order: ${d.trackingNo} · ${amount} paid
         </div>
 
-        <a href="index.html" class="btn-home">🏠 Naya Order Karo</a>
+        <a href="index.html" class="btn-home">Naya Order Karo</a>
       `;
+
       document.getElementById('resultCard').style.display = 'block';
       document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     function showError(msg) {
       const el = document.getElementById('errorMsg');
-      el.textContent = '⚠️ ' + msg;
+      el.textContent = msg;
       el.style.display = 'block';
     }
-    function hideError() { document.getElementById('errorMsg').style.display = 'none'; }
-    function showLoading(v) { document.getElementById('loading').style.display = v ? 'block' : 'none'; }
+
+    function hideError() {
+      document.getElementById('errorMsg').style.display = 'none';
+    }
+
+    function showLoading(show) {
+      document.getElementById('loading').style.display = show ? 'block' : 'none';
+    }
   </script>
 </body>
 </html>
