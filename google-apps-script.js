@@ -735,36 +735,29 @@ function ensureHeaders_(sheet) {
 function applySheetDropdowns_(sheet) {
   const lastRow = Math.max(sheet.getLastRow(), 100);
 
-  // Col 21: Campaign Status
-  const campaignRule = SpreadsheetApp.newDataValidation()
-    .requireValueInList(['Not Started', 'Launched', 'Completed', 'Campaign Error', 'Refunded'], true)
-    .setAllowInvalid(true).build();
-  sheet.getRange(2, 21, lastRow, 1).setDataValidation(campaignRule);
+  // Col 22 = Campaign Status
+  sheet.getRange(2, 22, lastRow, 1).setDataValidation(
+    SpreadsheetApp.newDataValidation()
+      .requireValueInList(['Not Started', 'Launched', 'Completed', 'Campaign Error', 'Refunded'], true)
+      .setAllowInvalid(true).build());
 
-  // Col 20: Verification Status
-  const verifyRule = SpreadsheetApp.newDataValidation()
-    .requireValueInList(['Pending', 'Verified', 'Failed'], true)
-    .setAllowInvalid(true).build();
-  sheet.getRange(2, 20, lastRow, 1).setDataValidation(verifyRule);
+  // Col 21 = Verification Status
+  sheet.getRange(2, 21, lastRow, 1).setDataValidation(
+    SpreadsheetApp.newDataValidation()
+      .requireValueInList(['Pending', 'Verified', 'Failed'], true)
+      .setAllowInvalid(true).build());
 
-  // Col 19: Payment Status
-  const payRule = SpreadsheetApp.newDataValidation()
-    .requireValueInList(['Created', 'Paid', 'Verification Failed', 'Refunded'], true)
-    .setAllowInvalid(true).build();
-  sheet.getRange(2, 19, lastRow, 1).setDataValidation(payRule);
+  // Col 20 = Payment Status
+  sheet.getRange(2, 20, lastRow, 1).setDataValidation(
+    SpreadsheetApp.newDataValidation()
+      .requireValueInList(['Created', 'Paid', 'Verification Failed', 'Refunded'], true)
+      .setAllowInvalid(true).build());
 
-  // Col 32: Refund Status
-  const refundRule = SpreadsheetApp.newDataValidation()
-    .requireValueInList(['', 'Requested', 'Processing', 'Done'], true)
-    .setAllowInvalid(true).build();
-  sheet.getRange(2, 32, lastRow, 1).setDataValidation(refundRule);
-}
-
-// Run this once manually to apply dropdowns to existing sheet
-function setupSheetDropdowns() {
-  const sheet = getOrdersSheet_();
-  applySheetDropdowns_(sheet);
-  Logger.log('Dropdowns applied!');
+  // Col 33 = Refund Status
+  sheet.getRange(2, 33, lastRow, 1).setDataValidation(
+    SpreadsheetApp.newDataValidation()
+      .requireValueInList(['', 'Requested', 'Processing', 'Done'], true)
+      .setAllowInvalid(true).build());
 }
 
 function upsertOrderRow_(data) {
