@@ -574,25 +574,25 @@ function applySheetDropdowns_(sheet) {
   // Col 21: Campaign Status
   const campaignRule = SpreadsheetApp.newDataValidation()
     .requireValueInList(['Not Started', 'Launched', 'Completed', 'Campaign Error', 'Refunded'], true)
-    .setAllowInvalid(false).build();
+    .setAllowInvalid(true).build();
   sheet.getRange(2, 21, lastRow, 1).setDataValidation(campaignRule);
 
   // Col 20: Verification Status
   const verifyRule = SpreadsheetApp.newDataValidation()
     .requireValueInList(['Pending', 'Verified', 'Failed'], true)
-    .setAllowInvalid(false).build();
+    .setAllowInvalid(true).build();
   sheet.getRange(2, 20, lastRow, 1).setDataValidation(verifyRule);
 
   // Col 19: Payment Status
   const payRule = SpreadsheetApp.newDataValidation()
     .requireValueInList(['Created', 'Paid', 'Verification Failed', 'Refunded'], true)
-    .setAllowInvalid(false).build();
+    .setAllowInvalid(true).build();
   sheet.getRange(2, 19, lastRow, 1).setDataValidation(payRule);
 
   // Col 32: Refund Status
   const refundRule = SpreadsheetApp.newDataValidation()
     .requireValueInList(['', 'Requested', 'Processing', 'Done'], true)
-    .setAllowInvalid(false).build();
+    .setAllowInvalid(true).build();
   sheet.getRange(2, 32, lastRow, 1).setDataValidation(refundRule);
 }
 
