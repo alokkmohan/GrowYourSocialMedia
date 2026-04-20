@@ -381,8 +381,22 @@ function updateLinkPreview() {
 }
 
 function onLinkConfirmChange() {
-  const confirmCheck = document.getElementById('linkConfirmCheck');
-  setProceedEnabled(confirmCheck && confirmCheck.checked);
+  const btn = document.getElementById('linkConfirmBtn');
+  const icon = document.getElementById('linkConfirmIcon');
+  const confirmed = btn.getAttribute('data-confirmed') !== 'true';
+  btn.setAttribute('data-confirmed', confirmed ? 'true' : 'false');
+  if (confirmed) {
+    btn.style.background = '#16a34a';
+    btn.style.color = '#fff';
+    btn.style.borderColor = '#16a34a';
+    icon.textContent = '✅';
+  } else {
+    btn.style.background = '#f0fdf4';
+    btn.style.color = '#166534';
+    btn.style.borderColor = '#86efac';
+    icon.textContent = '⬜';
+  }
+  setProceedEnabled(confirmed);
 }
 
 function setProceedEnabled(enabled) {
