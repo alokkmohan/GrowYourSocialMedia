@@ -246,7 +246,7 @@ function renderTable() {
         const service = o.service || o.objective || '';
         const mailSubject = encodeURIComponent('BoostKaro — Order #' + o.orderId + ' Update');
         const mailBody = encodeURIComponent('Namaskar ' + (o.name||'') + ',\n\nAapka order update hai.\n\nOrder ID: ' + o.orderId + '\n\nBoostKaro Team');
-        const hasEmail = o.email && o.email !== '-' && o.email.includes('@');
+        const hasEmail = o.email && o.email !== '-' && String(o.email).includes('@');
         return `<tr>
           <td class="sr">${i+1}</td>
           <td><span class="order-id">${o.orderId}</span></td>
