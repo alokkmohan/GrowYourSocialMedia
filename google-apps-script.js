@@ -1005,7 +1005,7 @@ function sendConfirmationEmail_(data, config) {
     '<p style="margin:0;color:#166534;font-weight:700;">🚀 Campaign tatkal live ho raha hai!</p>',
     '<p style="margin:6px 0 0;color:#166534;font-size:13px;">Campaign khatam hone par aapko final report email aur WhatsApp par milegi.</p>',
     '</div>',
-    '<p style="color:#a8784a;font-size:13px;margin-top:20px;">Koi sawaal ho to WhatsApp karo: <strong>+91 7054411333</strong></p>',
+    '<p style="color:#a8784a;font-size:13px;margin-top:20px;">Koi sawaal ho to WhatsApp karo: <strong>+91 9236569072</strong></p>',
     '</div></div>'
   ].join('');
   GmailApp.sendEmail(data.email, subject, 'Order confirmed: ' + data.orderId, { htmlBody: html });
@@ -1035,7 +1035,7 @@ function sendCampaignStartedEmail_(data, config) {
     '<p style="margin:0;color:#f97316;font-weight:700;">📊 Aage Kya Hoga?</p>',
     '<p style="margin:8px 0 0;color:#7a4f2d;font-size:13px;">Campaign khatam hone par aapko final report email par milegi — kitne views aaye, poori jankari ke saath.</p>',
     '</div>',
-    '<p style="color:#a8784a;font-size:13px;margin-top:20px;">Koi sawaal? WhatsApp karo: <strong>+91 7054411333</strong></p>',
+    '<p style="color:#a8784a;font-size:13px;margin-top:20px;">Koi sawaal? WhatsApp karo: <strong>+91 9236569072</strong></p>',
     '</div></div>'
   ].join('');
   GmailApp.sendEmail(data.email, subject, 'Campaign live: ' + data.orderId, { htmlBody: html });
@@ -1060,7 +1060,7 @@ function sendFinalReportEmail_(data, config) {
     buildEmailRow_('Campaign Duration', data.duration || ''),
     '</table>',
     '<p style="color:#a8784a;font-size:13px;margin-top:20px;">Dobara order karne ke liye: <a href="https://boostkaro.dataimpact.in">boostkaro.dataimpact.in</a></p>',
-    '<p style="color:#a8784a;font-size:13px;">WhatsApp: <strong>+91 7054411333</strong></p>',
+    '<p style="color:#a8784a;font-size:13px;">WhatsApp: <strong>+91 9236569072</strong></p>',
     '</div></div>'
   ].join('');
   GmailApp.sendEmail(data.email, subject, 'Campaign report: ' + data.orderId, { htmlBody: html });
