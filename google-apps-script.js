@@ -510,7 +510,9 @@ function ensureHeaders_(sheet) {
     // Notifications
     'Confirmation Email Sent', 'Final Report Sent', 'WhatsApp Notified',
     // Admin
-    'Refund Status', 'Notes'
+    'Refund Status', 'Notes',
+    // Quick Action
+    'WhatsApp Link'
   ]];
   if (sheet.getLastRow() === 0) {
     sheet.getRange(1, 1, 1, headers[0].length).setValues(headers);
@@ -582,10 +584,24 @@ function upsertOrderRow_(data) {
   ];
   if (existing) {
     sheet.getRange(existing.rowNumber, 1, 1, row.length).setValues([row]);
+    addWhatsAppFormula_(sheet, existing.rowNumber, data);
     return existing.rowNumber;
   }
   sheet.appendRow(row);
-  return sheet.getLastRow();
+  const newRow = sheet.getLastRow();
+  addWhatsAppFormula_(sheet, newRow, data);
+  return newRow;
+}
+
+function addWhatsAppFormula_(sheet, rowNumber, data) {
+  const phone = String(data.phone || '').replace(/\D/g, '');
+  if (!phone) return;
+  const msg = encodeURIComponent(
+    'Namaskar ' + (data.name || '') + '! Aapka BoostKaro Order #' + data.orderId +
+    ' confirm ho gaya hai. Campaign jald shuru hoga. Koi sawaal ho to batayein. 🚀'
+  );
+  const url = 'https://wa.me/' + phone + '?text=' + msg;
+  sheet.getRange(rowNumber, 35).setFormula('=HYPERLINK("' + url + '","📱 WhatsApp Bhejo")');
 }
 
 function updateOrderVerification_(rowNumber, values) {

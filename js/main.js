@@ -178,8 +178,7 @@ function proceedToPayment() {
   if (!isExpectedLinkForSelection(link)) return showError('Please enter the correct reel/video link for the selected service.');
   if (!phone) return showError('Please enter your mobile number.');
   if (!/^\d{10}$/.test(phone)) return showError('Please enter a valid 10-digit mobile number.');
-  if (!email) return showError('Email address zaruri hai — campaign updates ke liye.');
-  if (!isValidEmail(email)) return showError('Sahi email address likhein.');
+  if (email && !isValidEmail(email)) return showError('Sahi email address likhein.');
 
   order.name = name;
   order.link = link;
