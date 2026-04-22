@@ -77,15 +77,15 @@ const linkPlaceholders = {
 
 const linkHints = {
   youtube: {
-    shorts:    { text: 'Sirf YouTube Shorts ka link daalo — youtube.com/shorts/xxxxx. Facebook ya Instagram ka link yahan kaam nahi karega.', url: 'https://www.youtube.com/', btn: 'YouTube pe apna Short dhundho' },
-    longvideo: { text: 'Sirf YouTube Video ka link daalo — youtube.com/watch?v=xxxxx. Kisi aur platform ka link mat daalo.', url: 'https://www.youtube.com/', btn: 'YouTube pe apna Video dhundho' },
+    shorts:    { text: 'Sirf YouTube Shorts ka link daalo — youtube.com/shorts/xxxxx', url: 'https://www.youtube.com/', btn: 'YouTube pe apna Short dhundho' },
+    longvideo: { text: 'Sirf YouTube Video ka link daalo — youtube.com/watch?v=xxxxx', url: 'https://www.youtube.com/', btn: 'YouTube pe apna Video dhundho' },
   },
   instagram: {
-    reels: { text: 'Sirf Instagram Reel ka link daalo — instagram.com/reel/xxxxx. YouTube ya Facebook ka link yahan kaam nahi karega.', url: 'https://www.instagram.com/', btn: 'Instagram pe apna Reel dhundho' },
+    reels: { text: '⚠️ Pehle Reel post karo → upload karte time "Paid Partnership / Business Partner" tag karo + "Allow Boosting" ON karo → phir us Reel ka link yahan paste karo', url: 'https://www.instagram.com/', btn: 'Instagram kholo — Reel post karo' },
   },
   facebook: {
-    reels: { text: 'Sirf Facebook Reel ka link daalo — facebook.com/reel/xxxxx. YouTube ya Instagram ka link yahan kaam nahi karega.', url: 'https://www.facebook.com/', btn: 'Facebook pe apna Reel dhundho' },
-    video: { text: 'Sirf Facebook Video ka link daalo — facebook.com/video/xxxxx. Kisi aur platform ka link mat daalo.', url: 'https://www.facebook.com/', btn: 'Facebook pe apna Video dhundho' },
+    reels: { text: '⚠️ Pehle Reel post karo → upload karte time "Business Partner" tag karo + "Allow Boosting" ON karo → phir us Reel ka link yahan paste karo', url: 'https://www.facebook.com/', btn: 'Facebook kholo — Reel post karo' },
+    video: { text: '⚠️ Pehle Video post karo → upload karte time "Business Partner" tag karo + "Allow Boosting" ON karo → phir us Video ka link yahan paste karo', url: 'https://www.facebook.com/', btn: 'Facebook kholo — Video post karo' },
   },
 };
 
